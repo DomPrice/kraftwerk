@@ -1,13 +1,13 @@
 <?php
 /* 
 
-#####################################################
-	KRAFTWERK PARENT CLASS 
+###########################################################
+
+  KRAFTWERK VIEW CLASS 
 	
-	This is the control class for the kraftwerk application
-
-
-#####################################################
+  This is the control class for the kraftwerk views
+	
+###########################################################
 */
 class KraftwerkView {
 
