@@ -8,11 +8,11 @@ class KWConfig {
 	var $site_database_schema		= '';
 	
 	// CORE VARS
-	var $hosted_dir					= ""; // set this if you're hosting the kraftwerk app in a subdirectory
+	var $hosted_dir				= ""; // set this if you're hosting the kraftwerk app in a subdirectory
 	var $default_language 			= "en-us";
 
 	// IMAGE SETTINGS
-	var $image_save_dir				= "/files";
+	var $image_save_dir			= "/files";
 	var $image_display_path			= "/images";
 	var $image_max_size				= 2097152; // 2 Megabytes
 	var $image_accept_files			= array("image/jpeg","image/jpg");
@@ -21,6 +21,6 @@ class KWConfig {
 	var $image_max_height			= 500; // in pixels
 	
 	// ERROR HANDLING
-	var $report_errors				= "E_ALL";
+	var $report_errors			= "E_ALL";
 }
 ?>
