@@ -8,7 +8,7 @@ class KWConfig {
 	var $site_database_schema		= '';
 	
 	// CORE VARS
-	var $hosted_dir					= "/hosted/armasta.com/www"; // set this if you're hosting the kraftwerk app in a subdirectory
+	var $hosted_dir					= ""; // set this if you're hosting the kraftwerk app in a subdirectory
 	var $default_language 			= "en-us";
 
 	// IMAGE SETTINGS
