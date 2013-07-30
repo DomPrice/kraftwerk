@@ -33,6 +33,8 @@ class MySQLConnector {
 		@param $schema = (optional) default scheme for database.
 	*/
 	public function __construct($host='',$user='',$pass='',$schema='') { // schema is optional
+	
+		global $kw_config;
 
 		// SET LOGIN STATUS
 		$this->DB_HOST	 	= $host;

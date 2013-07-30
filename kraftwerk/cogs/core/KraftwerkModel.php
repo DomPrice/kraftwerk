@@ -16,8 +16,23 @@ class KraftwerkModel extends MySQLConnector {
 	public function find($id, $opts = array()) {
 		$table = $this->extrapolate_table(); // extrapolate table name based on model name
 		$query = "SELECT * FROM " . $table . " WHERE id=" . $id . ";";
-		print $query;
-		//return $this->runQuery($query);
+		return $this->runQuery($query);
+	}
+	
+	/*
+		FIND ALL
+		Returns all pets that meet the criteria specified in $opts
+		@param $opts parameters of query
+	*/
+	public function find_all($opts = array()) {
+		$table = $this->extrapolate_table(); // extrapolate table name based on model name
+		$params = "";
+		if(count($opts) > 0) {
+			 $params .= " WHERE 1=1";
+		}
+		$params .= ";";
+		$query = "SELECT * FROM " . $table . $params;
+		return $this->runQuery($query);
 	}
 	
 	/*
