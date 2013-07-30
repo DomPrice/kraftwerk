@@ -32,7 +32,8 @@ function kw_isalphanum($strIn) {
 	UTILITY FUNCTION: Makes string alpha numeric
 */ 
 function kw_alphanum_str($strIn) {
-	$strIn = preg_replace('/[^a-zA-Z0-9\-]/i',"",$strIn);
+	$output = str_replace(" ","_",$strIn);
+	$output = preg_replace('/[^a-zA-Z0-9_\-]/i',"",$output);
 	return $output;
 }
 
@@ -40,8 +41,8 @@ function kw_alphanum_str($strIn) {
 	UTILITY FUNCTION: FILTER OUT ALL NON ALPHA NUMERIC/SPACE CHARACTERS
 */
 function kw_alphanumspaces_str($strIn) {
-	$strIn = preg_replace('/[^a-zA-Z0-9 \-]/i',"",$strIn);
-	return $strIn;
+	$output = preg_replace('/[^a-zA-Z0-9 \-]/i',"",$strIn);
+	return $output;
 }
 
 /*
