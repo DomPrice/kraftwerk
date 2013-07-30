@@ -15,7 +15,11 @@ class KraftwerkModel extends MySQLConnector {
 	*/
 	public function find($id, $opts = array()) {
 		$table = $this->extrapolate_table(); // extrapolate table name based on model name
-		$query = "SELECT * FROM " . $table . " WHERE id=" . $id . ";";
+		$query = "SELECT * FROM " . $table . " WHERE id=" . $id;
+		if(count($opts)) { 
+			$query .= " AND " . $this->generate_params($opts);
+		}
+		$query .= ";";
 		return $this->runQuery($query);
 	}
 	
@@ -24,14 +28,9 @@ class KraftwerkModel extends MySQLConnector {
 		Returns all pets that meet the criteria specified in $opts
 		@param $opts parameters of query
 	*/
-	public function find_all($opts = array()) {
+	public function find_all($opts = array(),$limit="") {
 		$table = $this->extrapolate_table(); // extrapolate table name based on model name
-		$params = "";
-		if(count($opts) > 0) {
-			 $params .= " WHERE 1=1";
-		}
-		$params .= ";";
-		$query = "SELECT * FROM " . $table . $params;
+		$query = "SELECT * FROM " . $table . " WHERE" . $this->generate_params($opts) . ";";
 		return $this->runQuery($query);
 	}
 	
@@ -80,6 +79,31 @@ class KraftwerkModel extends MySQLConnector {
 		
 		// return name
 		return strtolower($table);
+	}
+	
+	/* 
+		GENERATES A PARAMETER LIST FOR PREDEFIED QUERIES BASED ON $opts
+		@returns SQL formatted query list
+	*/
+	private function generate_params($opts) {
+		$params = "";
+		if(count($opts) > 0) {
+			 $first_param = false; // first parameter
+			 foreach($opts as $key => $value) { // assemble the query
+				if($first_param != false) { 
+					$and = ' AND '; 
+				} else { 
+					$and = " "; 
+					$first_param = true; // set this so the next param includes AND
+				}
+				if(is_numeric($value)) { // if numeric
+					$params .= $and . $key . '=' . $value;
+				} else {
+					$params .= $and . $key . '="' . $value . '"';
+				}
+			 }
+		}
+		return $params;
 	}
 
 }

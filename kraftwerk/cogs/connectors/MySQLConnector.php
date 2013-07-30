@@ -24,6 +24,9 @@ class MySQLConnector {
 	// ERROR CODE HANDLING
 	protected $status 		= 0;
 	protected $statusCodes 	= array();
+	
+	// STORE
+	var $LAST_QUERY = ""; // stores last query so it can be referenced later.
 
 	/* 
 		CONSTRUTOR
@@ -86,6 +89,9 @@ class MySQLConnector {
 		} else {
 			$this->status = 1; // connection failed
 		}
+		
+		// STORE LAST QUERY
+		$this->LAST_QUERY = $query;
 
 		// RETURN RESULT
 		return $parsedResult; // return the result

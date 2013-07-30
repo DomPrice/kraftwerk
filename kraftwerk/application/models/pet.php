@@ -13,6 +13,7 @@ class Pet extends KraftwerkModel {
 	function all_pets() {
 		return $this->find_all();
 	}
+	
 }
 
 ?>
