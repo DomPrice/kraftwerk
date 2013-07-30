@@ -35,7 +35,8 @@ if(
 ) {
 	ini_set('error_reporting', $kw_config->error_reporting);
 }
+
 include_once(dirname(__FILE__) . '/core/Kraftwerk.php');
-$GLOBALS['kraftwerk'] = new Kraftwerk();
+$GLOBALS['kraftwerk'] = new Kraftwerk(); // run kraftwerk
 
 ?>

@@ -1,6 +1,6 @@
 <?php
 
-class Example extends MySQLConnector {
+class Example extends KraftwerkModel {
 
 	function get_something() {
 		$this->find(1);

@@ -1,21 +1,16 @@
 <?php
 /* 
 
-#####################################################
+###############################################################
 
-	KRAFTWERK UPLOADER CLASS 
+	FILE CONNECTOR CLASS 
 	
-	This class is used as a middle man in establishing upload
-	connections. 
+	This class is used as an abstraction layer in establishing 
+	upload and file manipulation connections. 
 
-#####################################################
+################################################################
 */
-class UploadConnector {
-
-	// CLASS VARIABLES
-	var $CLASSVERSION 		= '0.0.1';
-	var $CLASSDATE			= '07/27/2010';
-	var $CLASSAUTHORS		= 'Dom Price';
+class FileConnector {
 
 	// CONTROL VARIABLES FOR THIS CONNECTOR
 	protected $directory 		= ""; 			// directory the files will be uploaded to, this must be a FULL PATH

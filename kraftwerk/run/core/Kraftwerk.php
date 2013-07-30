@@ -15,12 +15,12 @@ class Kraftwerk {
 	
 	// COMPOMENT DIRECTORIES
 	// These will be appended to by the core if the hosting directory is different than "/" as set in config/config.php
-	var $LIB_DIR					= "/kraftwerk/lib";
-	var $CONFIG_GLOBAL_DIR			= "/kraftwerk/config";
-	var $CONTROLLERS_DIR			= "/kraftwerk/application/controllers";
-	var $MODELS_DIR					= "/kraftwerk/application/models";
-	var $VIEWS_DIR					= "/kraftwerk/application/views";
-	var $COGS_DIR					= "/kraftwerk/cogs";
+	var $LIB_DIR				= "/kraftwerk/lib";
+	var $CONFIG_GLOBAL_DIR		= "/kraftwerk/config";
+	var $CONTROLLERS_DIR		= "/kraftwerk/application/controllers";
+	var $MODELS_DIR				= "/kraftwerk/application/models";
+	var $VIEWS_DIR				= "/kraftwerk/application/views";
+	var $COGS_DIR				= "/kraftwerk/cogs";
 	
 	// OTHER STRUCTS
 	var $CORE_LIB_LOADED 		= array();
@@ -31,11 +31,16 @@ class Kraftwerk {
 	
 	var $CONFIG 				= "";
 	
+	// PUBLIC VARIABLES AND OBJECTS
+	public $logger				= "";
+	
 	/* 
 		CONSTRUTOR
 	*/
 	public function __construct() {
 		$this->loadComponents();
+		$this->loadLogger();
+		$this->loadExceptionHandler();
 	}
 	
 	/* 
@@ -50,6 +55,49 @@ class Kraftwerk {
 		$kw_config->MODELS_LOADED 			= $this->loadComponentDirectory($_SERVER['DOCUMENT_ROOT'] . $kw_config->hosted_dir . $kw_config->MODELS_DIR);
 		//$kw_config->CONTROLLERS_LOADED 		= $this->loadComponentDirectory($_SERVER['DOCUMENT_ROOT'] . $kw_config->CONTROLLERS_DIR);
 	}
+	
+	/* LOAD CLASSES */
+	public function loadComponentDirectory($comp_dir) {
+		$comps = $this->compsToArray($comp_dir);
+		for($i=0; $i<count($comps); $i++) {
+			include_once($comps[$i]);
+		}
+		return $comps;
+	}
+
+	/* RECURSIVELY LOAD CLASS DIRECTORIES */
+	public function compsToArray($directory) {
+		$extension = "php";
+		$comps = array();
+		if ($handle = opendir($directory)) {
+			while (false !== ($file = readdir($handle))) {
+				if ($file != "." && $file != "..") {
+					if (is_dir($directory . "/" . $file)) {
+						$comps = array_merge($comps, $this->compsToArray($directory . "/" . $file)); 
+					} else { 
+						if(!$extension || (ereg("." . $extension, $file))) {
+							$comps[] = $directory . "/" . $file;
+						}
+					}
+				}
+			}
+			closedir($handle);
+		}
+		return $comps;
+	}
+	
+	/* INITLIALIZE LOGGER */
+	public function loadLogger() {
+		$this->logger = new KraftwerkLogger();
+	}
+	
+	/* INITLIALIZE LOGGER */
+	public function loadExceptionHandler() {
+		$this->exception = new KraftwerkException($logger);	
+	}
+
+	// ####################### DEPRECATED ####################################
+	
 	
 	/* LOAD DIR 
 	private function loadDirectory($dir,$loaded) {
@@ -87,36 +135,6 @@ class Kraftwerk {
 		closedir($open); 
 		return $views;
 	}*/
-
-	/* LOAD CLASSES */
-	function loadComponentDirectory($comp_dir) {
-		$comps = $this->compsToArray($comp_dir);
-		for($i=0; $i<count($comps); $i++) {
-			include_once($comps[$i]);
-		}
-		return $comps;
-	}
-
-	/* RECURSIVELY LOAD CLASS DIRECTORIES */
-	function compsToArray($directory) {
-		$extension = "php";
-		$comps = array();
-		if ($handle = opendir($directory)) {
-			while (false !== ($file = readdir($handle))) {
-				if ($file != "." && $file != "..") {
-					if (is_dir($directory . "/" . $file)) {
-						$comps = array_merge($comps, $this->compsToArray($directory . "/" . $file)); 
-					} else { 
-						if(!$extension || (ereg("." . $extension, $file))) {
-							$comps[] = $directory . "/" . $file;
-						}
-					}
-				}
-			}
-			closedir($handle);
-		}
-		return $comps;
-	}
 
 	
 }
