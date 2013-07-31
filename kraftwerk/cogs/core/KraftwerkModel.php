@@ -128,6 +128,15 @@ class KraftwerkModel extends MySQLConnector {
 	}
 	
 	/*
+		ALIAS FOR runQuery() MYSQLIN CONNECTOR, RUN DIRECT MYSQL QUERY
+		@param $query = Query to run
+		@returns Query result
+	*/
+	public function sql($query) {
+		return $this->runQuery($query);	
+	}
+	
+	/*
 		RETURNS THE NAME OF THE CLASS THAT IS EXTENDING THIS CONNECTOR
 		@returns $String class name of current object extending this connector
 	*/

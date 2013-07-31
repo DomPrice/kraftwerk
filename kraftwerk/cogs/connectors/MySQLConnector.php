@@ -96,15 +96,6 @@ class MySQLConnector {
 		// RETURN RESULT
 		return $parsedResult; // return the result
 	}
-	
-	/*
-		ALIAS FOR runQuery()
-		@param $query = Query to run
-		@returns Query result
-	*/
-	public function sql($query) {
-		return $this->runQuery($query);	
-	}
 
 	/*
 		CONVERT A QUERY RESULT INTO AN ARRAY
