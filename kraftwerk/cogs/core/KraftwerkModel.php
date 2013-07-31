@@ -18,7 +18,7 @@ class KraftwerkModel extends MySQLConnector {
 	*/
 	public function find($id, $opts = array()) {
 		$table = $this->extrapolate_table(); // extrapolate table name based on model name
-		$query = "SELECT * FROM " . $table . " WHERE id=" . $id;
+		$query = "SELECT * FROM " . $table . " WHERE id=" . intval($id);
 		if(count($opts)) { 
 			$query .= " AND " . $this->generate_params_clause($opts);
 		}
@@ -52,14 +52,21 @@ class KraftwerkModel extends MySQLConnector {
 	public function save($data = array()) {
 		$table = $this->extrapolate_table(); // extrapolate table name based on model name
 		
-		// CHECK IF EXISTS
-		$existing_records = $this->find_all($data);
-		if(count($existing_records) > 0) {
-			$query = "UPDATE " . $table . " SET " . generate_update_clause($data) . ";"; // update existing record
-		} else {
-			$query = "INSERT INTO " . $table . generate_insert_clause($data) . ";"; // insert new record
+		// CHECK IF 
+		$existing_records = 0;
+		if($data["id"] && is_numeric($data["id"])) {
+			$existing_records = $this->find($data["id"]);
 		}
-		//return $this->runQuery($query);
+		var_dump($existing_records);
+		if(count($existing_records) > 0 && $data["id"] != "" && $data["id"] != NULL) {
+			$id = $data["id"];
+			unset($data["id"]); // unset the id, we are not changing it.
+			$query = "UPDATE " . $table . " SET " . $this->generate_update_clause($data) . " WHERE id=" . intval($id) . ";"; // update existing record
+		} else {
+			$query = "INSERT INTO " . $table . $this->generate_insert_clause($data) . ";"; // insert new record
+		}
+		//return $query;
+		return $this->runQuery($query);
 	}
 	
 	/*
@@ -71,9 +78,14 @@ class KraftwerkModel extends MySQLConnector {
 	*/
 	public function delete($id,$data = array()) {
 		$table = $this->extrapolate_table(); // extrapolate table name based on model name
-		
-		
-		//return $this->runQuery($query);
+		if(is_numeric($id) && $id != "" && $id != NULL) { 
+			$query = "DELETE FROM " . $table . " WHERE id=" . $id;
+			if(count($data) > 0) {
+				 $query .= " AND " . $this->generate_params_clause($data);
+			}
+			$query .= ";";
+		}
+		return $this->runQuery($query);
 	}
 	
 	/*
@@ -189,9 +201,9 @@ class KraftwerkModel extends MySQLConnector {
 			$first_param = false; // first parameter
 			foreach($opts as $key => $value) { // assemble the query
 				if($first_param != false) { 
-					$and = ', '; 
+					$and = ','; 
 				} else { 
-					$and = " "; 
+					$and = ""; 
 					$first_param = true; // set this so the next param includes a comma
 				}
 				$params .= $and . $key;
@@ -202,9 +214,9 @@ class KraftwerkModel extends MySQLConnector {
 			$first_param = false; // first parameter			 
 			foreach($opts as $key => $value) { // assemble the query
 				if($first_param != false) { 
-					$and = ', '; 
+					$and = ','; 
 				} else { 
-					$and = " "; 
+					$and = ""; 
 					$first_param = true; // set this so the next param includes a comma
 				}
 				if(is_numeric($value)) { // if numeric
@@ -214,7 +226,7 @@ class KraftwerkModel extends MySQLConnector {
 				}
 			 }
 			 
-			$params .= ");";
+			$params .= ")";
 
 		}
 		return $params;
