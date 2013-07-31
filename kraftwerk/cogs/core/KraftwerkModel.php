@@ -12,12 +12,20 @@ class KraftwerkModel extends MySQLConnector {
 	
 	// CLASS VARS
 	protected $data = array(); // stored data from singular query result
+	protected $fields= array(); // fields used by this table, will be used for checking
+	
+	// If set in a child class that extends KraftwerkModel, Kraftwerk will attempt to write to this table instead.
+	protected $use_table = NULL; 
 	
 	/*
 		SEARCH FUNCTIONS
 	*/
 	public function find($id, $opts = array()) {
-		$table = $this->extrapolate_table(); // extrapolate table name based on model name
+		if($this->use_table != "" && $use_table != NULL && kw_isalphanum($use_table)) {
+			$table = $this->use_table; // use declared table
+		} else {
+			$table = $this->extrapolate_table(); // extrapolate table name based on model name
+		}
 		$query = "SELECT * FROM " . $table . " WHERE id=" . intval($id);
 		if(count($opts)) { 
 			$query .= " AND " . $this->generate_params_clause($opts);
@@ -32,7 +40,14 @@ class KraftwerkModel extends MySQLConnector {
 		@param $opts parameters of query
 	*/
 	public function find_all($opts = array(),$limit="") {
-		$table = $this->extrapolate_table(); // extrapolate table name based on model name
+		
+		// SET TABLE
+		if($this->use_table != "" && $use_table != NULL && kw_isalphanum($use_table)) {
+			$table = $this->use_table; // use declared table
+		} else {
+			$table = $this->extrapolate_table(); // extrapolate table name based on model name
+		}
+		
 		$query = "SELECT * FROM " . $table . " WHERE" . $this->generate_params_clause($opts) . ";";
 		return $this->runQuery($query);
 	}
@@ -50,7 +65,13 @@ class KraftwerkModel extends MySQLConnector {
 		@returns whether or not entry successfully saved
 	*/
 	public function save($data = array()) {
-		$table = $this->extrapolate_table(); // extrapolate table name based on model name
+		
+		// SET TABLE
+		if($this->use_table != "" && $use_table != NULL && kw_isalphanum($use_table)) {
+			$table = $this->use_table; // use declared table
+		} else {
+			$table = $this->extrapolate_table(); // extrapolate table name based on model name
+		}
 		
 		// CHECK IF 
 		$existing_records = 0;
@@ -77,7 +98,14 @@ class KraftwerkModel extends MySQLConnector {
 		@returns whether or not entry successfully deleted
 	*/
 	public function delete($id,$data = array()) {
-		$table = $this->extrapolate_table(); // extrapolate table name based on model name
+		
+		// SET TABLE
+		if($this->use_table != "" && $use_table != NULL && kw_isalphanum($use_table)) {
+			$table = $this->use_table; // use declared table
+		} else {
+			$table = $this->extrapolate_table(); // extrapolate table name based on model name
+		}
+		
 		if(is_numeric($id) && $id != "" && $id != NULL) { 
 			$query = "DELETE FROM " . $table . " WHERE id=" . $id;
 			if(count($data) > 0) {

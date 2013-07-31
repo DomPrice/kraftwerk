@@ -18,7 +18,7 @@ function kw_sanitize_str($strIn) {
 }
 
 /*
-	UTILITY FUNCTION: Makes string alpha numeric
+	UTILITY FUNCTION: Check to see if String is Alpha-Numeric
 */ 
 function kw_isalphanum($strIn) {
 	$output = false;
