@@ -196,9 +196,9 @@ class KraftwerkModel extends MySQLConnector {
 		@returns array of the model's fields and their types
 	*/
 	public function fields() {
-		// execute only if not explicitly stated in the child model
+		// execute only if fields not explicitly stated in the child model
 		if(count($this->fields) <= 0 || $this->fields == NULL || $this->fields == "") { 
-			$table = get_table();
+			$table = $this->get_table();
 			$this->getFields($table);
 		}
 		return $this->fields;
@@ -209,6 +209,11 @@ class KraftwerkModel extends MySQLConnector {
 							PRIVATE FUNCTIONS
 		###########################################################
 	*/
+	
+	private function validate_data_types($conditions) {
+		$output = true;
+		return $output;
+	}
 	
 	/* 
 		RETURN THE EXTRAPOLATED TABLE NAME THAT KRAFTWERK WILL ATTEMPT TO ACCESS WHEN DOING SELF QUERIES ON A MODEL EXTENDING THIS CLASS
