@@ -67,34 +67,52 @@ class MySQLConnector {
 	*/
 	public function runQuery($query) {
 
-		// CONNECT
-		if($innerConn = mysql_connect($this->DB_HOST,$this->DB_USERNAME,$this->DB_PASSWORD)) { // establish a connection for this query
-			mysql_select_db($this->DB_SCHEMA); // select database
-
-			// DO QUERY AND PARSE IT
-			if($queryResult = mysql_query($query)) {
-				if($parsedResult 	= $this->parseResult($queryResult)) {
+		// create connection
+		$innerConn = new mysqli($this->DB_HOST, $this->DB_USERNAME, $this->DB_PASSWORD);
+		
+		// check connection
+		if(!mysqli_connect_errno()) {
+			$innerConn->select_db($this->DB_SCHEMA); // select database
+			if($queryResult = $innerConn->query($query)) { // run query
+				if($parsedResult = $this->parseResult($queryResult)) {
 					$this->status = 5; // query successful
 				} else {
 					$this->status = 3; // query failed to parse
 				}
+				$queryResult->close(); // close result
 			} else {
 				$this->status = 4; // query failed
 			}
-
-			// CLOSE CONNECTIONS
-			@mysql_free_result($queryResult);
-			mysql_close($innerConn); // close connection
-
 		} else {
 			$this->status = 1; // connection failed
+			$this->statusCodes[1] .= ": " . mysqli_connect_error(); // append error
 		}
+		
+		// close database connection
+		$innerConn->close();
 		
 		// STORE LAST QUERY
 		$this->LAST_QUERY = $query;
 
 		// RETURN RESULT
 		return $parsedResult; // return the result
+	}
+	
+	/*
+		GET FIELD TYPES OF A TABLE
+		@param $table = Table to get fields for
+		@returns Query result
+	*/
+	protected function getFields($table) { 
+		$result = $this->runQuery("DESCRIBE " . $table . ";"); // describe table query
+		foreach($result as $field) { // extract field info from result
+			$type = $field->Type; // field type
+			$name = $field->Field; // field name
+			$this->fields[$name] = array();
+			$this->fields[$name]["type"] = substr($type,0,strpos($type,"(")); // strip the size off
+			$this->fields[$name]["size"] = intval(substr($type,strpos($type,"(")+1,strpos($type,")"))); // strip the type off, convert to int
+		}
+		return $this->fields; // return field info
 	}
 
 	/*
@@ -105,17 +123,16 @@ class MySQLConnector {
 	private function parseResult($result) {
 
 		// SET RETURN TYPE TO ARRAY
-        settype($parsedOut,"array");
+        $parsedOut = array();
 
 		// CHECK VALIDITY OF RESULT
         if(!$result){ // test to see if result exists
 			$this->status = 2; // query is blank
         } else { 
-			// PARSE RESULT
-			for($i=0; $i<@mysql_numrows($result); $i++){
-				for($j=0;$j<@mysql_num_fields($result);$j++){
-					$parsedOut[$i][@mysql_field_name($result,$j)] = @mysql_result($result,$i,@mysql_field_name($result,$j));
-				}
+			$row = 0;
+			while ($obj = $result->fetch_object()) {
+				$parsedOut[$row] = $obj; // push result
+				$row++;
 			}
 		}
 

@@ -6,6 +6,7 @@
 	KRAFTWERK STRING LIB
 	
 	String manipulation functions that can be used in the framework.
+	Core functions use these, so do not delete or change this file.
 
 ###############################################################################
 */
