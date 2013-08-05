@@ -33,17 +33,14 @@ class KraftwerkModel extends MySQLConnector {
 		$table = $this->get_table(); // get table
 		$result = NULL;
 		
-		if($this->validate_data_types($conditions)) {	
-			// construct query
-			$query = "SELECT * FROM " . $table . " WHERE id=" . intval($id);
-			if(count($conditions)) { 
-				$query .= " AND " . $this->generate_params_clause($conditions);
+		// construct query
+		if($id != NULL && $id != "" && $id != 0) {
+			$query = "SELECT * FROM " . $table . " WHERE id=" . intval($id); 
+			if((count($conditions) > 0) && $this->validate_data_types($conditions)) {
+				$query .= " AND" . $this->generate_params_clause($conditions);
 			}
 			$query .= ";";
-		
-			// run query
 			$result = $this->runQuery($query);
-		
 			$this->data = $result[0]; // save result internally
 		}
 		
@@ -212,6 +209,16 @@ class KraftwerkModel extends MySQLConnector {
 	
 	private function validate_data_types($conditions) {
 		$output = true;
+		foreach($conditions as $field => $value) {
+			if($this->is_field_type_datetime($field) && !kw_ismysqldatetime($value)) {
+				$output = false;
+			} elseif($this->is_field_type_datetime($field) && !kw_ismysqldate($value)) {
+				$output = false;	
+			} elseif($this->is_field_type_number($field) && !is_numeric($value)) {
+				$output = false;	
+			}
+			// assume it is a string if none of these are false
+		}
 		return $output;
 	}
 	
@@ -260,7 +267,7 @@ class KraftwerkModel extends MySQLConnector {
 					$and = " "; 
 					$first_param = true; // set this so the next param includes AND
 				}
-				if($this->is_a_number($value)) { // if numeric
+				if($this->is_field_type_number($key)) { // if numeric
 					$params .= $and . $key . '=' . $value;
 				} else {
 					$params .= $and . $key . '="' . $value . '"';

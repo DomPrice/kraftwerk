@@ -58,5 +58,4 @@ function kw_isemail($strIn) {
 	return $output;
 }
 
-
 ?>

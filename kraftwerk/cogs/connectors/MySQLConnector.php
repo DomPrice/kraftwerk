@@ -109,8 +109,12 @@ class MySQLConnector {
 			$type = $field->Type; // field type
 			$name = $field->Field; // field name
 			$this->fields[$name] = array();
-			$this->fields[$name]["type"] = substr($type,0,strpos($type,"(")); // strip the size off
-			$this->fields[$name]["size"] = intval(substr($type,strpos($type,"(")+1,strpos($type,")"))); // strip the type off, convert to int
+			if(strpos($type,"(")) {
+				$this->fields[$name]["type"] = substr($type,0,strpos($type,"(")); // strip the size off
+				$this->fields[$name]["size"] = intval(substr($type,strpos($type,"(")+1,strpos($type,")"))); // strip the type off, convert to int
+			} else {
+				$this->fields[$name]["type"] = $type; // strip the size off
+			}
 		}
 		return $this->fields; // return field info
 	}
