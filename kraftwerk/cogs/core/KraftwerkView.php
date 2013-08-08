@@ -15,42 +15,24 @@ class KraftwerkView {
 	}
 
 	/* 
-		LOAD VIEWS
-		Loads the global layouts
-		VOID
-	*/
-	public function loadViews($layouts) {
-		$this->VIEWS_LOADED = $layouts;
-	}
-
-	/* 
-		GET VIEWS
-		Retrieves the global layouts
-	*/
-	public function getViews() {
-		return $this->VIEWS_LOADED;
-	}
-
-	/* 
 		USE LAYOUT
 		Use this layout for content
 		VOID
-	*/
-	public function useLayout($layout) {
-		$this->USE_LAYOUT = $layout;
+	
+	public function use_layout($layout) {
+		$this->layout = $layout;
 	}
 
 	/* 
 		PARSE CONTENT
 		Parse the data
 		VOID
-	*/
-	public function parseContent($content) {
+	
+	public function parse_content($content) {
 		$CONTENT = $content; // load content data
-		$thisLayout  = $this->VIEWS_LOADED[$this->USE_LAYOUT];
+		$thisLayout  = $this->layout;
 		include_once($thisLayout);
 	}
-
-	
+*/
 }
 ?>
