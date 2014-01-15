@@ -28,6 +28,8 @@ class Kraftwerk {
 	var $COGS_LOADED 			= array();
 	var $MODELS_LOADED 			= array();
 	var $CONTROLLERS_LOADED 	= array();
+	var $CURRENT_CONTROLLER     = NULL;
+	var $CURRENT_ACTION		    = NULL;
 	
 	var $CONFIG 				= "";
 	
@@ -95,6 +97,17 @@ class Kraftwerk {
 	public function loadExceptionHandler() {
 		$this->exception = new KraftwerkException($logger);	
 	}
+	
+	/* 
+		LOAD CONTROLLER 
+		@param $controller = Controller name
+	*/
+	public function loadController($controller) {
+		$this->CURRENT_CONTROLLER = $controller;
+		include_once($this->CONTROLLERS_DIR . "/" . $controller . "_controller.php");
+		//$this->CURRENT_CONTROLLER = new
+	}
+	
 
 	// ####################### DEPRECATED ####################################
 	
