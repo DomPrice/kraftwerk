@@ -52,9 +52,9 @@ class Kraftwerk {
 	*/
 	public function loadComponents() {
 		global $kw_config;
-		$kw_config->CORE_LIB_LOADED 		= $this->loadComponentDirectory($_SERVER['DOCUMENT_ROOT'] . $kw_config->hosted_dir . $this->LIB_DIR);
-		$kw_config->COGS_LOADED 			= $this->loadComponentDirectory($_SERVER['DOCUMENT_ROOT'] . $kw_config->hosted_dir . $this->COGS_DIR);
-		$kw_config->MODELS_LOADED 			= $this->loadComponentDirectory($_SERVER['DOCUMENT_ROOT'] . $kw_config->hosted_dir . $kw_config->MODELS_DIR);
+		$kw_config->CORE_LIB_LOADED 		= $this->loadComponentDirectory(realpath($_SERVER['DOCUMENT_ROOT']) . $kw_config->hosted_dir . $this->LIB_DIR);
+		$kw_config->COGS_LOADED 			= $this->loadComponentDirectory(realpath($_SERVER['DOCUMENT_ROOT']) . $kw_config->hosted_dir . $this->COGS_DIR);
+		$kw_config->MODELS_LOADED 			= $this->loadComponentDirectory(realpath($_SERVER['DOCUMENT_ROOT']) . $kw_config->hosted_dir . $kw_config->MODELS_DIR);
 		//$kw_config->CONTROLLERS_LOADED 		= $this->loadComponentDirectory($_SERVER['DOCUMENT_ROOT'] . $kw_config->CONTROLLERS_DIR);
 	}
 	
@@ -101,11 +101,48 @@ class Kraftwerk {
 	/* 
 		LOAD CONTROLLER 
 		@param $controller = Controller name
+		@return true/false
 	*/
 	public function loadController($controller) {
-		$this->CURRENT_CONTROLLER = $controller;
-		include_once($this->CONTROLLERS_DIR . "/" . $controller . "_controller.php");
-		//$this->CURRENT_CONTROLLER = new
+		global $kw_config; // grab global settings
+		
+		// include controller class file and then initialize it
+		(@include_once(realpath($_SERVER['DOCUMENT_ROOT']) . $kw_config->hosted_dir .  $this->CONTROLLERS_DIR . "/" . $controller . "_controller.php") )
+			or die("Kraftwerk received a request that it does not have a controller for. [" . $controller . "];");
+		
+		@eval('$this->CURRENT_CONTROLLER = new ' . $this->controllerToClassName($controller) . '();'); // load into ENV
+		
+		// return true/false on whether controller successfully loaded
+		if($this->CURRENT_CONTROLLER != NULL) {
+			return true;
+		} else {
+			return false;	
+		}
+	}
+	
+	/* 
+		LOAD ACTION
+		Perform the provided action on the currently loaded controller
+		@param $action = Action Name
+		@return true/false
+	*/
+	public function loadAction($action) {
+		$this->CURRENT_ACTION = $action;
+		$function = '$this->CURRENT_CONTROLLER->' . $this->CURRENT_ACTION;
+		if(method_exists($this->CURRENT_CONTROLLER->instance_of(),$action)) {
+			eval($function . '();');
+		} else {
+			die("Kraftwerk received a request on controller:[" . $this->CURRENT_CONTROLLER->instance_of() . "] that it does not have an action for. [" . $action . "];");
+		}
+	}
+	
+	/*
+		Return extrapolated Class name from loaded controller name
+		@param $controller = Controller name
+		@return properly formatted Controller Class definition for use in the app
+	*/
+	private function controllerToClassName($controller) {
+    	return preg_replace('/(?:^|_)([a-z])/e', 'strtoupper($1)', $controller) . "Controller";
 	}
 	
 

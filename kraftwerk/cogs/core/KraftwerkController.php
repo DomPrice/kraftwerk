@@ -69,7 +69,7 @@ class KraftwerkController {
 		$controller_name = $this->instance_of();
 		
 		// remove the controller label from the end of the class, this will be the folder
-		$folder = preg_replace('~Controller(?!.*Controller)~', 'bar', $controller_name); 
+		$folder = preg_replace('~Controller(?!.*Controller)~', '', $controller_name); 
 		
 		// split string based on camel case
 		foreach(str_split($folder) as $char) {

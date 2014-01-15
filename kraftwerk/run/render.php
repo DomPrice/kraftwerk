@@ -17,17 +17,11 @@
 
 // INITIALIZE
 include_once("init.php");
-
-// GRAB VARS FROM URL	
-//Structure Example /controller/action/id
-//print $_GET["controller"] . "<br />"; 	// get controller
-//print $_GET["action"] . "<br />"; 		// get action
-//print $_GET["id"] . "<br />"; 			// get idd
-//print $_GET["query"] . "<br />";			// get query
-var_dump($_GET);
+// var_dump($_GET);
 		
 // LOAD CONTROLLER FIRST
-//$GLOBALS['kraftwerk']->loadController($_GET["controller"]);
+$GLOBALS['kraftwerk']->loadController($_GET["controller"]);
+$GLOBALS['kraftwerk']->loadAction($_GET["action"]);
 
 
 ?>
