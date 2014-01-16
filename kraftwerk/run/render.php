@@ -17,7 +17,6 @@
 
 // INITIALIZE
 include_once("init.php");
-// var_dump($_GET);
 		
 // LOAD CONTROLLER FIRST
 $GLOBALS['kraftwerk']->loadController($_GET["controller"]);
