@@ -43,6 +43,7 @@ class Kraftwerk {
 		$this->loadComponents();
 		$this->loadLogger();
 		$this->loadExceptionHandler();
+		$this->loadPathes();
 	}
 	
 	/* 
@@ -134,6 +135,15 @@ class Kraftwerk {
 		} else {
 			die("Kraftwerk received a request on controller:[" . $this->CURRENT_CONTROLLER->instance_of() . "] that it does not have an action for. [" . $action . "];");
 		}
+	}
+	
+	/*
+		Appends the $hosted directory pathname to any other variables that require the full path
+		@return void
+	*/
+	private function loadPathes() {
+		global $kw_config;
+		$this->VIEWS_DIR = $kw_config->hosted_dir . $this->VIEWS_DIR;
 	}
 	
 	/*

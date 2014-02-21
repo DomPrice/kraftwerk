@@ -10,45 +10,43 @@
 */
 class KraftwerkController {
 	
-	// CLASS VARS
-	protected $current_action 	= "index"; // stored action name
+	public $view = NULL; // placeholder for view
 	
 	/* 
 		CONSTRUTOR
 	*/
-	public function __construct() {
-	}
+	public function __construct() { }
 	
 	/*
 		RENDER
 		Renders the current template
 		@param 
 	*/
-	public function render($path="",$vars=array()) {
+	public function render($view="",$options=array()) {
 		global $kraftwerk;
-		if($path != "" && $path != NULL) {
-			// load explicit view
-			include_once($kraftwerk->VIEWS_DIR . "/" . $path);
-		} else { 
-			// attempt to load a view based on the controller name and action
-			include_once($kraftwerk->VIEWS_DIR . "/" . $this->extrapolate_view());
+		
+		// REGISTER GLOBALS
+		foreach($options as $key => $value) {
+			if($GLOBALS[$key] == "" || $GLOBALS[$key] == NULL) {
+				$GLOBALS[$key] = $value;
+				eval("global $$key;"); //register global
+			}
 		}
+		
+		// RENDER
+		if($view != NULL && $view != "") {
+			$path =  $kraftwerk->VIEWS_DIR . "/" . $this->extrapolate_view($view);
+		} else {
+			$path =  $kraftwerk->VIEWS_DIR . "/" . $this->extrapolate_view();
+		}
+		include_once(realpath($_SERVER['DOCUMENT_ROOT']) . $path);
 	}
 	
 	/*
-		RUN ACTION
-		@param $action Run the specified action
+		RENDER PARTIAL
 	*/
-	public function run_action($action="",$params=array()) {
-	
-	}
-	
-	/*
-		RETURNS THE NAME OF THE ACTION THAT IS CURRENTLY BEING EXECUTED
-		@returns $String class name of current object extending this connector
-	*/
-	public function current_action() {
-		return $this->current_action;
+	public function render_partial($vars=array(),$path="") {
+		
 	}
 	
 	/*
@@ -61,9 +59,11 @@ class KraftwerkController {
 	
 	/* 
 		RETURN THE EXTRAPOLATED VIEW NAME THAT KRAFTWERK WILL LOAD, must be placed inside the controller class
-		@returns $String returns the extrapolated view name based on controller name
+		@returns $String returns the extrapolated view name based on controller name, otherwise returns the view name based on
+		                 the input variable $view_name
 	*/
-	private function extrapolate_view() {
+	private function extrapolate_view($view_name="") {
+		global $kraftwerk;
 		
 		// get class name
 		$controller_name = $this->instance_of();
@@ -79,12 +79,16 @@ class KraftwerkController {
 
 		$folder = preg_replace("/[^a-zA-Z0-9\s]/", "_", $output);
 		
-		// now get the action
-		$action_name = $this->current_action();
-		$view_file = preg_replace("/[^a-zA-Z0-9\s]/", "_", $action_name);
+		// now get the action if no view specified
+		if($view_name == NULL || $view_name == "") {
+			$view_name = $this->kraftwerk->CURRENT_ACTION;			
+		}
+		
+		// make filename friendly
+		$view_file = preg_replace("/[^a-zA-Z0-9\s]/", "_", $view_name);
 		
 		// assemble string
-		$view = $folder . "/" . $view_file;
+		$view = $folder . "/" . $view_file . ".php";
 		
 		// return name
 		return strtolower($view);
