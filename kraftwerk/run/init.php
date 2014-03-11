@@ -22,7 +22,7 @@
 
 // ERRORS
 ini_set('display_errors', '1');
-error_reporting(E_ALL ^ E_NOTICE);
+error_reporting(E_ERROR | E_WARNING | E_PARSE);
 
 // LOAD KRAFTWERK APPLICATION
 include_once(dirname(__FILE__) . '/../config/kwconfig.php');
