@@ -21,6 +21,8 @@ class KWConfig {
 	var $image_max_height			= 500; // in pixels
 	
 	// ERROR HANDLING
-	var $report_errors			= "E_ALL";
+	var $error_reporting		= 1;
+	var $report_errors			= "E_ERROR | E_WARNING | E_PARSE";
+	
 }
 ?>
