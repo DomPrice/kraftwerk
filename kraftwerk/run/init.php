@@ -25,15 +25,8 @@ include_once(dirname(__FILE__) . '/../config/kwconfig.php');
 $kw_config = new KWConfig();
 
 // ERRORS
-if(
-	$kw_config->error_reporting != 0 && 
-	$kw_config->error_reporting != "" && 
-	strtolower($kw_config->error_reporting) != "off" && 
-	$kw_config->error_reporting != false
-) {
-	ini_set('display_errors', $kw_config->error_reporting);
-	ini_set('error_reporting', $kw_config->report_errors);
-}
+ini_set('display_errors', $kw_config->error_reporting);
+ini_set('error_reporting', $kw_config->report_errors);
 
 include_once(dirname(__FILE__) . '/core/Kraftwerk.php');
 $GLOBALS['kraftwerk'] = new Kraftwerk(); // run kraftwerk
