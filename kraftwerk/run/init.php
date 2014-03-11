@@ -20,8 +20,8 @@
 
 //#################################################################################
 
-// CREATE CONFIG OBJECT<br />
-
+// CREATE CONFIG OBJECT
+ini_set('display_errors', '1');
 
 // LOAD KRAFTWERK APPLICATION
 include_once(dirname(__FILE__) . '/../config/kwconfig.php');
