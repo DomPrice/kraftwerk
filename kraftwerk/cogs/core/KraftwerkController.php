@@ -61,6 +61,11 @@ class KraftwerkController {
 			print $GLOBALS["$yield"];
 		}
 		
+		// alias
+		function kw_yield() {
+			print $GLOBALS["$yield"];
+		}
+		
 		// SNIPPET FUNCTION / Include a snippet from the snippet directory
 		function snippet($snippet="") {
 			global $kraftwerk;
@@ -77,6 +82,11 @@ class KraftwerkController {
 			}
 		}
 		
+		// alias
+		function kw_snippet() {
+			snippet($snippet="");
+		}
+
 		// RENDER TEMPLATE
 		$template_path = realpath($_SERVER['DOCUMENT_ROOT']) . $kw_config->hosted_dir . $kraftwerk->VIEWS_DIR . "/_layouts/_templates/" . $this->template . ".php";
 		if(file_exists($template_path)) {
