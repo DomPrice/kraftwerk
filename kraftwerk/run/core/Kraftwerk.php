@@ -53,16 +53,29 @@ class Kraftwerk {
 	*/
 	public function loadComponents() {
 		global $kw_config;
-		$kw_config->CORE_LIB_LOADED 		= $this->loadComponentDirectory(realpath($_SERVER['DOCUMENT_ROOT']) . $kw_config->hosted_dir . $this->LIB_DIR);
-		$kw_config->COGS_LOADED 			= $this->loadComponentDirectory(realpath($_SERVER['DOCUMENT_ROOT']) . $kw_config->hosted_dir . $this->COGS_DIR);
-		$kw_config->MODELS_LOADED 			= $this->loadComponentDirectory(realpath($_SERVER['DOCUMENT_ROOT']) . $kw_config->hosted_dir . $kw_config->MODELS_DIR);
-		//$kw_config->CONTROLLERS_LOADED 		= $this->loadComponentDirectory($_SERVER['DOCUMENT_ROOT'] . $kw_config->CONTROLLERS_DIR);
+		
+		// load libs
+		$this->loadComponentDirectory(realpath($_SERVER['DOCUMENT_ROOT']) . $kw_config->hosted_dir . $this->LIB_DIR);
+		
+		// load cogs/dependencies
+		$this->loadComponentDirectory(realpath($_SERVER['DOCUMENT_ROOT']) . $kw_config->hosted_dir . $this->COGS_DIR . "/connectors");
+		$this->loadComponentDirectory(realpath($_SERVER['DOCUMENT_ROOT']) . $kw_config->hosted_dir . $this->COGS_DIR . "/core");
+		$this->loadComponentDirectory(realpath($_SERVER['DOCUMENT_ROOT']) . $kw_config->hosted_dir . $this->COGS_DIR . "/custom");
+		$this->loadComponentDirectory(realpath($_SERVER['DOCUMENT_ROOT']) . $kw_config->hosted_dir . $this->COGS_DIR . "/extensions");
+		$this->loadComponentDirectory(realpath($_SERVER['DOCUMENT_ROOT']) . $kw_config->hosted_dir . $this->COGS_DIR . "/utility");
+		
+		// load the models
+		$this->loadComponentDirectory(realpath($_SERVER['DOCUMENT_ROOT']) . $kw_config->hosted_dir . $kw_config->MODELS_DIR);
+		
+		//$kw_config->CONTROLLERS_LOADED 		= $this->loadComponentDirectory(realpath($_SERVER['DOCUMENT_ROOT']) . $kw_config->hosted_dir . $kw_config->CONTROLLERS_DIR);
 	}
 	
 	/* LOAD CLASSES */
 	public function loadComponentDirectory($comp_dir) {
 		$comps = $this->compsToArray($comp_dir);
+		//var_dump($comps);
 		for($i=0; $i<count($comps); $i++) {
+			//print $comps[$i] . "\n";
 			include_once($comps[$i]);
 		}
 		return $comps;
