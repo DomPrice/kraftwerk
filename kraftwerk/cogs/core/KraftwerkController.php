@@ -83,8 +83,8 @@ class KraftwerkController {
 		}
 		
 		// alias
-		function kw_snippet() {
-			snippet($snippet="");
+		function kw_snippet($snippet="") {
+			snippet($snippet);
 		}
 
 		// RENDER TEMPLATE
