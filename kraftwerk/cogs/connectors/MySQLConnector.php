@@ -158,8 +158,6 @@ class MySQLConnector {
 		return $this->status;
 	}
 
-	
-	
 }
 
 ?>

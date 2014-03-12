@@ -21,7 +21,7 @@ class KWConfig {
 	var $image_max_height			= 500; // in pixels
 	
 	// ERROR HANDLING
-	var $display_errors			= true;
+	var $display_errors				= true;
 	
 }
 ?>
