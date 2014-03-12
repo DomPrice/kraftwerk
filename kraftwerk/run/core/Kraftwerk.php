@@ -43,7 +43,6 @@ class Kraftwerk {
 		$this->loadComponents();
 		$this->loadLogger();
 		$this->loadExceptionHandler();
-		$this->loadPathes();
 	}
 	
 	/* 
@@ -65,9 +64,8 @@ class Kraftwerk {
 		$this->loadComponentDirectory(realpath($_SERVER['DOCUMENT_ROOT']) . $kw_config->hosted_dir . $this->COGS_DIR . "/utility");
 		
 		// load the models
-		$this->loadComponentDirectory(realpath($_SERVER['DOCUMENT_ROOT']) . $kw_config->hosted_dir . $kw_config->MODELS_DIR);
+		$this->loadComponentDirectory(realpath($_SERVER['DOCUMENT_ROOT']) . $kw_config->hosted_dir . $this->MODELS_DIR);
 		
-		//$kw_config->CONTROLLERS_LOADED 		= $this->loadComponentDirectory(realpath($_SERVER['DOCUMENT_ROOT']) . $kw_config->hosted_dir . $kw_config->CONTROLLERS_DIR);
 	}
 	
 	/* LOAD CLASSES */
@@ -149,15 +147,6 @@ class Kraftwerk {
 	}
 	
 	/*
-		Appends the $hosted directory pathname to any other variables that require the full path
-		@return void
-	*/
-	private function loadPathes() {
-		global $kw_config;
-		$this->VIEWS_DIR = $kw_config->hosted_dir . $this->VIEWS_DIR;
-	}
-	
-	/*
 		Return extrapolated Class name from loaded controller name
 		@param $controller = Controller name
 		@return properly formatted Controller Class definition for use in the app
@@ -165,48 +154,6 @@ class Kraftwerk {
 	private function controllerToClassName($controller) {
     	return preg_replace('/(?:^|_)([a-z])/e', 'strtoupper($1)', $controller) . "Controller";
 	}
-	
-
-	// ####################### DEPRECATED ####################################
-	
-	
-	/* LOAD DIR 
-	private function loadDirectory($dir,$loaded) {
-		$open 	= opendir($dir); // Load Library Directory
-		while ($read = readdir($open)) {
-			if ($read!= "." && $read!= "..") {
-				$ext = substr($read,strrpos($read, '.')+1);
-				if($ext == "php") { // Only Load PHP Files
-					include_once($dir . $read);
-					if(count($loaded) == 0) {
-						$loaded[0] = $read;
-					} else {
-						$loaded[count($loaded)] = $read;
-					}
-				}
-			}
-		}
-		closedir($open);
-		return $loaded;
-	}*/
-	
-	/* GATHER COMPONENTS 
-	function gatherComponents($component_dir) {
-		$open 		= opendir($component_dir);
-		$views	= array();
-		while ($read = readdir($open)) {
-			if ($read!= "." && $read!= "..") {
-				$ext 		= substr($read,strrpos($read, '.')+1);
-				$fileroot 	= substr($read,0,strrpos($read, '.'));
-				if($ext == "php") { // Only Load PHP Files
-					$views[$fileroot] = $component_dir . $read;
-				}
-			}
-		}
-		closedir($open); 
-		return $views;
-	}*/
-
 	
 }
 ?>

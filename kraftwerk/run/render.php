@@ -17,8 +17,9 @@
 
 // INITIALIZE
 include_once("init.php");
-		
+
 // LOAD CONTROLLER FIRST
+$GLOBALS['kraftwerk']->loadController("application"); // load application controller first
 $GLOBALS['kraftwerk']->loadController($_GET["controller"]);
 $GLOBALS['kraftwerk']->loadAction($_GET["action"]);
 
