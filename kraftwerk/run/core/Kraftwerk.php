@@ -73,9 +73,7 @@ class Kraftwerk {
 	/* LOAD CLASSES */
 	public function loadComponentDirectory($comp_dir) {
 		$comps = $this->compsToArray($comp_dir);
-		//var_dump($comps);
 		for($i=0; $i<count($comps); $i++) {
-			//print $comps[$i] . "\n";
 			include_once($comps[$i]);
 		}
 		return $comps;
