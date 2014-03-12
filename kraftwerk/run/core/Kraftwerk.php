@@ -15,12 +15,12 @@ class Kraftwerk {
 	
 	// COMPOMENT DIRECTORIES
 	// These will be appended to by the core if the hosting directory is different than "/" as set in config/config.php
-	var $LIB_DIR				= "/kraftwerk/lib";
-	var $CONFIG_GLOBAL_DIR		= "/kraftwerk/config";
-	var $CONTROLLERS_DIR		= "/kraftwerk/application/controllers";
-	var $MODELS_DIR				= "/kraftwerk/application/models";
-	var $VIEWS_DIR				= "/kraftwerk/application/views";
-	var $COGS_DIR				= "/kraftwerk/cogs";
+	var $LIB_DIR				= "/lib";
+	var $CONFIG_GLOBAL_DIR		= "/config";
+	var $CONTROLLERS_DIR		= "/application/controllers";
+	var $MODELS_DIR				= "/application/models";
+	var $VIEWS_DIR				= "/application/views";
+	var $COGS_DIR				= "/cogs";
 	
 	// OTHER STRUCTS
 	var $CORE_LIB_LOADED 		= array();
@@ -40,9 +40,28 @@ class Kraftwerk {
 		CONSTRUTOR
 	*/
 	public function __construct() {
+		$this->pathNames();
 		$this->loadComponents();
 		$this->loadLogger();
 		$this->loadExceptionHandler();
+	}
+	
+	/*
+		CONFIGURE PATH NAMES
+	*/
+	public function pathNames() {
+		global $kw_config;
+		if(isset($kw_config->kw_root) && ($kw_config->kw_root != "")) {
+			$kw_root = $kw_config->kw_root	;
+		} else {
+			$kw_root = "kraftwerk";	
+		}
+		$this->LIB_DIR				= "/" . $kw_root . "/lib";
+		$this->CONFIG_GLOBAL_DIR	= "/" . $kw_root . "/config";
+		$this->CONTROLLERS_DIR		= "/" . $kw_root . "/application/controllers";
+		$this->MODELS_DIR			= "/" . $kw_root . "/application/models";
+		$this->VIEWS_DIR			= "/" . $kw_root . "/application/views";
+		$this->COGS_DIR				= "/" . $kw_root . "/cogs";
 	}
 	
 	/* 

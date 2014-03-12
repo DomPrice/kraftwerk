@@ -9,6 +9,7 @@ class KWConfig {
 	
 	// CORE VARS
 	var $hosted_dir					= ""; // set this if you're hosting the kraftwerk app in a subdirectory
+	var $kw_root					= ""; // set this if kraftwerk is being run from a directory other than "kraftwerk"
 	var $default_language 			= "en-us";
 
 	// IMAGE SETTINGS
