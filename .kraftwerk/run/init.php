@@ -7,10 +7,10 @@
 		
 	developer: Dom Price (info@domprice.com)
 	created: 04/19/2010
-	last:	 07/23/2013
+	last:	 03/12/2014
 
-	(c) 2010-2013 - Dom Price - http://www.domprice.com
-	This software is open source and licensed under the standaed MIT license.
+	(c) 2010-2014 - Dom Price - http://www.domprice.com
+	This software is open source and licensed under the standard MIT license.
     Creative Commons license also applies. All developers must be listed in this file.
 
 ##########################################################################

@@ -54,7 +54,7 @@ class Kraftwerk {
 		if(isset($kw_config->kw_root) && ($kw_config->kw_root != "")) {
 			$kw_root = $kw_config->kw_root	;
 		} else {
-			$kw_root = "kraftwerk";	
+			$kw_root = ".kraftwerk"; // default to . syntax
 		}
 		$this->LIB_DIR				= "/" . $kw_root . "/lib";
 		$this->CONFIG_GLOBAL_DIR	= "/" . $kw_root . "/config";
