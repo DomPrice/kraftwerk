@@ -11,11 +11,21 @@
 class KraftwerkController {
 	
 	public $view = NULL; // placeholder for view
+	public $template = NULL; // template to use
 	
 	/* 
 		CONSTRUTOR
 	*/
 	public function __construct() { }
+	
+	/*
+		USE TEMPLATE
+		Tells the renderer what template to use
+		@param $template, name of template
+	*/
+	public function use_template($template) {
+		$this->template = $template;
+	}
 	
 	/*
 		RENDER
@@ -24,7 +34,8 @@ class KraftwerkController {
 	*/
 	public function render($view="",$options=array()) {
 		global $kraftwerk;
-		
+		global $kw_config;
+
 		// REGISTER GLOBALS
 		foreach($options as $key => $value) {
 			if($GLOBALS[$key] == "" || $GLOBALS[$key] == NULL) {
@@ -35,11 +46,31 @@ class KraftwerkController {
 		
 		// RENDER
 		if($view != NULL && $view != "") {
-			$path =  $kraftwerk->VIEWS_DIR . "/" . $this->extrapolate_view($view);
+			$path =  $kw_config->hosted_dir . $kraftwerk->VIEWS_DIR . "/" . $this->extrapolate_view($view);
 		} else {
-			$path =  $kraftwerk->VIEWS_DIR . "/" . $this->extrapolate_view();
+			$path =  $kw_config->hosted_dir . $kraftwerk->VIEWS_DIR . "/" . $this->extrapolate_view();
 		}
-		include_once(realpath($_SERVER['DOCUMENT_ROOT']) . $path);
+		
+		// OUTPUT TO BUFFER FOR LATER INSERTION INTO TEMPLATE
+		ob_start();
+		include(realpath($_SERVER['DOCUMENT_ROOT']) . $path);
+		$GLOBALS["$yield"] = ob_get_clean(); // send result to globals
+
+		// YIELD FUNCTION / Yields the content from within the template
+		function yield() {
+			print $GLOBALS["$yield"];
+		}
+		
+		// SNIPPET FUNCTION / Include a snippet from the snippet directory
+		function snippet($snippet) {
+			global $kraftwerk;
+			global $kw_config;
+			include(realpath($_SERVER['DOCUMENT_ROOT']) . $kw_config->hosted_dir . $kraftwerk->VIEWS_DIR . "/_layouts/_snippets/" . $snippet . ".php");
+		}
+		
+		// RENDER TEMPLATE
+		include(realpath($_SERVER['DOCUMENT_ROOT']) . $kw_config->hosted_dir . $kraftwerk->VIEWS_DIR . "/_layouts/_templates/" . $this->template . ".php");
+		
 	}
 	
 	/*
