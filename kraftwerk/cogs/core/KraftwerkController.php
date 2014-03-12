@@ -53,7 +53,7 @@ class KraftwerkController {
 		
 		// OUTPUT TO BUFFER FOR LATER INSERTION INTO TEMPLATE
 		ob_start();
-		include(realpath($_SERVER['DOCUMENT_ROOT']) . $path);
+		include_once(realpath($_SERVER['DOCUMENT_ROOT']) . $path);
 		$GLOBALS["$yield"] = ob_get_clean(); // send result to globals
 
 		// YIELD FUNCTION / Yields the content from within the template
@@ -62,14 +62,32 @@ class KraftwerkController {
 		}
 		
 		// SNIPPET FUNCTION / Include a snippet from the snippet directory
-		function snippet($snippet) {
+		function snippet($snippet="") {
 			global $kraftwerk;
 			global $kw_config;
-			include(realpath($_SERVER['DOCUMENT_ROOT']) . $kw_config->hosted_dir . $kraftwerk->VIEWS_DIR . "/_layouts/_snippets/" . $snippet . ".php");
+			$snippet_path = realpath($_SERVER['DOCUMENT_ROOT']) . $kw_config->hosted_dir . $kraftwerk->VIEWS_DIR . "/_layouts/_snippets/" . $snippet . ".php";
+			if(file_exists($snippet_path)) {
+				include_once($snippet_path);
+			} else {
+				if($snippet == "") {
+					die("Kraftwerk expects a snippet name and it was not found.");
+				} else {
+					die("Kraftwerk cannot find the specified snippet file [" . $snippet . "]");
+				}
+			}
 		}
 		
 		// RENDER TEMPLATE
-		include(realpath($_SERVER['DOCUMENT_ROOT']) . $kw_config->hosted_dir . $kraftwerk->VIEWS_DIR . "/_layouts/_templates/" . $this->template . ".php");
+		$template_path = realpath($_SERVER['DOCUMENT_ROOT']) . $kw_config->hosted_dir . $kraftwerk->VIEWS_DIR . "/_layouts/_templates/" . $this->template . ".php";
+		if(file_exists($template_path)) {
+			include_once($template_path);
+		} else {
+			if($this->template == "") {
+				die("Kraftwerk cannot find a template associated with this view. Please check your controller to verify a template has been specified.");
+			} else {
+				die("Kraftwerk cannot find the specified template file [" . $this->template . "]");
+			}
+		}
 		
 	}
 	
