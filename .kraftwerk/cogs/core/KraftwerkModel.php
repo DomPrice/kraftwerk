@@ -121,7 +121,10 @@ class KraftwerkModel extends MySQLConnector {
 			$existing_records = $this->find($data["id"]);
 		}
 		
-		if($this->validate_data_types($data)) {		
+		// VALIDATE DATATYPES
+		$datatypes_valid = $this->validate_data_types($data);
+		
+		if($datatypes_valid["status"] == true) {		
 			if(count($existing_records) > 0 && $data["id"] != "" && $data["id"] != NULL) {
 				$id = $data["id"];
 				unset($data["id"]); // unset the id, we are not changing it.
@@ -132,6 +135,8 @@ class KraftwerkModel extends MySQLConnector {
 			
 			//return $query;
 			$result = $this->runQuery($query);
+		} else { 
+			die($datatypes_valid["error"]);
 		}
 		
 		// return result
@@ -208,14 +213,18 @@ class KraftwerkModel extends MySQLConnector {
 	*/
 	
 	private function validate_data_types($conditions) {
-		$output = true;
+		$output = array();
+		$output["status"] = true;
 		foreach($conditions as $field => $value) {
 			if($this->is_field_type_datetime($field) && !$this->is_valid_mysql_datetime($value)) {
-				$output = false;
-			} elseif($this->is_field_type_datetime($field) && !$this->is_valid_mysql_date($value)) {
-				$output = false;	
+				$output["status"] = false;
+				$output["error"] = "Type mismatch: The value of `" . $field . "` is not a correctly formatted MySQL datetime value: " . $value;
+			} elseif($this->is_field_type_date($field) && !$this->is_valid_mysql_date($value)) {
+				$output["status"] = false;	
+				$output["error"] = "Type mismatch: The value of `" . $field . "` is not a correctly formatted MySQL date value: " . $value;
 			} elseif($this->is_field_type_number($field) && !is_numeric($value)) {
-				$output = false;	
+				$output["status"] = false;	
+				$output["error"] = "Type mismatch: The value of `" . $field . "` is not a correctly formatted numeric value: " . $value;
 			}
 			// assume it is a string if none of these are false
 		}
@@ -406,14 +415,24 @@ class KraftwerkModel extends MySQLConnector {
 		RETURNS WHETHER VALUE IS VALID MYSQL DATE
 	*/
 	protected function is_valid_mysql_date($strIn) {
-    	return preg_match("/^([0-9]{4})-([0-9]{2})-([0-9]{2})$/", $strIn);
+		if (preg_match("/^(\d{4})-(\d{2})-(\d{2})$/", $strIn, $matches)) { 
+        	if (checkdate($matches[2], $matches[3], $matches[1])) { 
+           		return true; 
+        	} 
+    	} 
+    	return false; 
 	}
 
 	/*
 		RETURNS WHETHER VALUE IS VALID MYSQL DATETIME
 	*/
 	protected function is_valid_mysql_datetime($strIn) {
-		return preg_match("/^\d{4}-\d{2}-\d{2} [0-2][0-3]:[0-5][0-9]:[0-5][0-9]$/", $strIn);
+		if (preg_match("/^(\d{4})-(\d{2})-(\d{2}) ([01][0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9])$/", $strIn, $matches)) { 
+        	if (checkdate($matches[2], $matches[3], $matches[1])) { 
+           		return true; 
+        	} 
+    	} 
+    	return false; 
 	}
 	
 	/*
@@ -469,9 +488,22 @@ class KraftwerkModel extends MySQLConnector {
 	protected function is_field_type_datetime($field_name) {
 		$type = $this->field_type($field_name);
 		$output = false;
-		if(strtoupper($type) == "DATE" || strtoupper($type) == "TIME" || strtoupper($type) == "DATETIME" 
+		if(strtoupper($type) == "TIME" || strtoupper($type) == "DATETIME" 
 			|| strtoupper($type) == "TIMESTAMP" || strtoupper($type) == "YEAR"
 		) {
+			$output = true;
+		}
+		return $output;
+	}
+	
+	/*
+		RETURNS WHETHER OR NOT THE SELECTED FIELD IS A DATE
+		@returns true/false
+	*/
+	protected function is_field_type_date($field_name) {
+		$type = $this->field_type($field_name);
+		$output = false;
+		if(strtoupper($type) == "DATE") {
 			$output = true;
 		}
 		return $output;

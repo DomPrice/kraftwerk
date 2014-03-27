@@ -66,26 +66,34 @@ class MySQLConnector {
 		@returns Query result
 	*/
 	public function runQuery($query) {
+		
+		// clear status
+		$this->status = 0;
 
 		// create connection
 		$innerConn = new mysqli($this->DB_HOST, $this->DB_USERNAME, $this->DB_PASSWORD);
 		
 		// check connection
 		if(!mysqli_connect_errno()) {
+
 			$innerConn->select_db($this->DB_SCHEMA); // select database
-			if($queryResult = $innerConn->query($query)) { // run query
+			$queryResult = $innerConn->query($query);
+
+			if($queryResult) { // run query
 				if($parsedResult = $this->parseResult($queryResult)) {
 					$this->status = 5; // query successful
 				} else {
 					$this->status = 3; // query failed to parse
 				}
-				$queryResult->close(); // close result
+				$queryResult->close(); // close result*/
 			} else {
 				$this->status = 4; // query failed
-			}
+				$this->statusCodes[4] .= ": " . $innerConn->error; // append error
+			} 
+			
 		} else {
 			$this->status = 1; // connection failed
-			$this->statusCodes[1] .= ": " . mysqli_connect_error(); // append error
+			$this->statusCodes[1] .= ": " . $innerConn->connect_error; // append error
 		}
 		
 		// close database connection
