@@ -35,13 +35,23 @@ class KraftwerkModel extends MySQLConnector {
 		
 		// construct query
 		if($id != NULL && $id != "" && $id != 0) {
-			$query = "SELECT * FROM " . $table . " WHERE id=" . intval($id); 
-			if((count($conditions) > 0) && $this->validate_data_types($conditions)) {
-				$query .= " AND" . $this->generate_params_clause($conditions);
+
+			// needed for mysql_real_escape_string
+			$innerConn = new mysqli($this->DB_HOST, $this->DB_USERNAME, $this->DB_PASSWORD);
+			
+			// make sure connection valid
+			if(!mysqli_connect_errno()) {
+				$query = "SELECT * FROM " . $table . " WHERE id=" . intval($id); 
+				if((count($conditions) > 0) && $this->validate_data_types($conditions,$innerConn)) {
+					$query .= " AND" . $this->generate_params_clause($conditions,$innerConn);
+				}
+				$query .= ";";
+				$result = $this->runQuery($query);
+				$this->data = $result[0]; // save result internally
+				
+				// close connection, we'll use another to execute
+				$innerConn->close();
 			}
-			$query .= ";";
-			$result = $this->runQuery($query);
-			$this->data = $result[0]; // save result internally
 		}
 		
 		return $result;
@@ -60,40 +70,52 @@ class KraftwerkModel extends MySQLConnector {
 		$result = NULL;
 		
 		if($table != NULL && $table != "") {
-			$query = "SELECT * FROM " . $table;
 			
-			// WHERE CLAUSE
-			if($this->validate_data_types($conditions)) {	
-				$query .= " WHERE" . $this->generate_params_clause($conditions);
-			}
+			// needed for mysql_real_escape_string
+			$innerConn = new mysqli($this->DB_HOST, $this->DB_USERNAME, $this->DB_PASSWORD);
 			
-			// ORDER BY CLAUSE
-			if(isset($filters["order_by"]) && $filters["order_by"] != NULL && $filters["order_by"] != "") {	
-				if(kw_isalphanum($filters["order_by"]) && $this->field_exists($filters["order_by"])) { // if field exists and is alpha numeric
-					$query .= " ORDER_BY " . $filters["order_by"];
+			// make sure connection valid
+			if(!mysqli_connect_errno()) {
+			
+				$query = "SELECT * FROM " . $table;
+				
+				// WHERE CLAUSE
+				if($this->validate_data_types($conditions)) {	
+					$query .= " WHERE" . $this->generate_params_clause($conditions,$innerConn);
 				}
-			}
-			
-			// DESC ORDER?
-			if(isset($filters["desc"]) && $filters["desc"] == "true") {	
-				$query .= " DESC";
-			}
-			
-			// MAX/MIN -> LIMIT X,XX
-			if(isset($filters["max"]) && $filters["max"] != NULL && $filters["max"] != "") { // check if max min exist
-				$max = $filters["max"];
-				if(!isset($filters["min"]) || $filters["min"] == "" || $filters["min"] == NULL) { // min is optional
-					$min = $filters["min"];
-				} else {
-					$min = intval(0); // default to zero
+				
+				// ORDER BY CLAUSE
+				if(isset($filters["order_by"]) && $filters["order_by"] != NULL && $filters["order_by"] != "") {	
+					if(kw_isalphanum($filters["order_by"]) && $this->field_exists($filters["order_by"])) { // if field exists and is alpha numeric
+						$query .= " ORDER_BY " . $filters["order_by"];
+					}
 				}
-				if(is_int($min) && is_int($max)) { // only valid integers 
-					$query .= " LIMIT " . intval($min) . "," . intval($max); // force integers to be safe
+				
+				// DESC ORDER?
+				if(isset($filters["desc"]) && $filters["desc"] == "true") {	
+					$query .= " DESC";
 				}
+				
+				// MAX/MIN -> LIMIT X,XX
+				if(isset($filters["max"]) && $filters["max"] != NULL && $filters["max"] != "") { // check if max min exist
+					$max = $filters["max"];
+					if(!isset($filters["min"]) || $filters["min"] == "" || $filters["min"] == NULL) { // min is optional
+						$min = $filters["min"];
+					} else {
+						$min = intval(0); // default to zero
+					}
+					if(is_int($min) && is_int($max)) { // only valid integers 
+						$query .= " LIMIT " . intval($min) . "," . intval($max); // force integers to be safe
+					}
+				}
+				
+				// close connection, we'll use another to execute
+				$innerConn->close();
 			}
+				
+			$result = $this->runQuery($query . ";");
 		}
-		
-		$result = $this->runQuery($query . ";");
+
 		return $result;
 	}
 	
@@ -124,17 +146,31 @@ class KraftwerkModel extends MySQLConnector {
 		// VALIDATE DATATYPES
 		$datatypes_valid = $this->validate_data_types($data);
 		
-		if($datatypes_valid["status"] == true) {		
-			if(count($existing_records) > 0 && $data["id"] != "" && $data["id"] != NULL) {
-				$id = $data["id"];
-				unset($data["id"]); // unset the id, we are not changing it.
-				$query = "UPDATE " . $table . " SET " . $this->generate_update_clause($data) . " WHERE id=" . intval($id) . ";"; // update existing record
-			} else {
-				$query = "INSERT INTO " . $table . $this->generate_insert_clause($data) . ";"; // insert new record
-			}
+		if($datatypes_valid["status"] == true) {	
+		
+			// needed for mysql_real_escape_string
+			$innerConn = new mysqli($this->DB_HOST, $this->DB_USERNAME, $this->DB_PASSWORD);
 			
+			// make sure connection valid
+			if(!mysqli_connect_errno()) {
+				
+				// generate save query
+				if(count($existing_records) > 0 && $data["id"] != "" && $data["id"] != NULL) {
+					$id = $data["id"];
+					unset($data["id"]); // unset the id, we are not changing it.
+					$query = "UPDATE " . $table . " SET " . $this->generate_update_clause($data,$innerConn) . " WHERE id=" . intval($id) . ";"; // update existing record
+				} else {
+					$query = "INSERT INTO " . $table . $this->generate_insert_clause($data,$innerConn) . ";"; // insert new record
+				}
+				
+				// close connection, we're using a different one to run the query
+				$innerConn->close();
+
+			}
+				
 			//return $query;
 			$result = $this->runQuery($query);
+
 		} else { 
 			die($datatypes_valid["error"]);
 		}
@@ -156,11 +192,23 @@ class KraftwerkModel extends MySQLConnector {
 		$table = $this->get_table();
 		
 		if(is_numeric($id) && $id != "" && $id != NULL) { 
-			$query = "DELETE FROM " . $table . " WHERE id=" . intval($id);
-			if(count($conditions) > 0) {
-				 $query .= " AND " . $this->generate_params_clause($conditions);
+		
+			// needed for mysql_real_escape_string
+			$innerConn = new mysqli($this->DB_HOST, $this->DB_USERNAME, $this->DB_PASSWORD);
+			
+			// delete record
+			if(!mysqli_connect_errno()) {
+				$query = "DELETE FROM " . $table . " WHERE id=" . intval($id);
+				if(count($conditions) > 0) {
+					 $query .= " AND " . $this->generate_params_clause($conditions,$innerConn);
+				}
+				$query .= ";";
+				
 			}
-			$query .= ";";
+			
+			// close connection, we'll use a different connection to run the query
+			$innerConn->close();
+			
 		}
 		return $this->runQuery($query);
 	}
@@ -279,9 +327,10 @@ class KraftwerkModel extends MySQLConnector {
 		@param $conditions = Conditions as Array to convert to SQL conditonal clause
 		@returns SQL formatted query list
 	*/
-	private function generate_params_clause($conditions) {
+	private function generate_params_clause($conditions,$innerConn) {
 		$params = "";
 		if(count($conditions) > 0) {
+			
 			 $first_param = false; // first parameter
 			 foreach($conditions as $key => $value) { // assemble the query
 				if($first_param != false) { 
@@ -293,9 +342,10 @@ class KraftwerkModel extends MySQLConnector {
 				if($this->is_field_type_number($key)) { // if numeric
 					$params .= $and . $key . '=' . $value;
 				} else {
-					$params .= $and . $key . '="' . $value . '"';
+					$params .= $and . $key . '="' . mysqli_real_escape_string($innerConn,$value) . '"';
 				}
 			 }
+			 
 		}
 		return $params;
 	}
@@ -305,11 +355,12 @@ class KraftwerkModel extends MySQLConnector {
 		@param $conditions = Conditions as Array to convert to SQL conditonal clause
 		@returns SQL formatted query param list for update
 	*/
-	private function generate_update_clause($conditions) {
+	private function generate_update_clause($conditions,$innerConn) {
 		$params = "";
 		if(count($conditions) > 0) {
-			 $first_param = false; // first parameter
-			 foreach($conditions as $key => $value) { // assemble the query
+				
+			$first_param = false; // first parameter
+			foreach($conditions as $key => $value) { // assemble the query
 				if($first_param != false) { 
 					$and = ', '; 
 				} else { 
@@ -319,9 +370,10 @@ class KraftwerkModel extends MySQLConnector {
 				if(is_numeric($value)) { // if numeric
 					$params .= $and . $key . '=' . $value;
 				} else {
-					$params .= $and . $key . '="' . $value . '"';
+					$params .= $and . $key . '="' . mysqli_real_escape_string($innerConn,$value) . '"';
 				}
-			 }
+			}
+				
 		}
 		return $params;
 	}
@@ -331,10 +383,11 @@ class KraftwerkModel extends MySQLConnector {
 		@param $conditions = Conditions as Array to convert to SQL conditonal clause
 		@returns SQL formatted query param list for update
 	*/
-	private function generate_insert_clause($conditions) {
+	private function generate_insert_clause($conditions,$innerConn) {
 		$params = $params .= "("; // open bracket for keys
 		if(count($conditions) > 0) {
-
+				
+			// go through query now
 			$first_param = false; // first parameter
 			foreach($conditions as $key => $value) { // assemble the query
 				if($first_param != false) { 
@@ -359,10 +412,9 @@ class KraftwerkModel extends MySQLConnector {
 				if(is_numeric($value)) { // if numeric and field type is a number (int/float)
 					$params .= $and . $value;
 				} else { // treat as string
-					$params .= $and .  '"' . $value . '"';
+					$params .= $and .  '"' . mysqli_real_escape_string($innerConn,$value) . '"';
 				}
 			 }
-			 
 			$params .= ")";
 
 		}
