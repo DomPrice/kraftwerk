@@ -164,13 +164,13 @@ class Kraftwerk {
 				if($reflection->isPublic()) {
 					eval($function . '();');
 				} else {
-					die("Kraftwerk cannot call action [" . $action . "] on controller [" . $this->CURRENT_CONTROLLER->instance_of() . "]; Action is not public.");
+					die("Kraftwerk cannot call action:[" . $action . "] on controller:[" . $this->CURRENT_CONTROLLER->instance_of() . "]; Action is not public.");
 				}
 			} else {
 				die("Kraftwerk received a request on controller:[" . $this->CURRENT_CONTROLLER->instance_of() . "] that it does not have an action for. [" . $action . "];");
 			}
 		} catch(Exception $e) {
-			die("Kraftwerk cannot call action [" . $action . "] on controller [" . $this->CURRENT_CONTROLLER->instance_of() . "];");
+			die("Kraftwerk cannot call action:[" . $action . "] on controller:[" . $this->CURRENT_CONTROLLER->instance_of() . "];");
 		}
 	}
 	
