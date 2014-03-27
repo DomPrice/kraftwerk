@@ -80,12 +80,21 @@ class MySQLConnector {
 			$queryResult = $innerConn->query($query);
 
 			if($queryResult) { // run query
-				if($parsedResult = $this->parseResult($queryResult)) {
-					$this->status = 5; // query successful
+				
+				// parse result
+				if(method_exists($queryResult,"fetch_object")) {
+					if($parsedResult = $this->parseResult($queryResult)) {
+						$this->status = 5; // query successful
+					} else {
+						$this->status = 3; // query failed to parse
+					}
+					if(method_exists($queryResult,"close")) {
+						$queryResult->close(); // close result
+					}
 				} else {
-					$this->status = 3; // query failed to parse
+					$this->status = 2; // query returned empty recordset
+					$this->statusCodes[2] .= ": Query executed but returned no results. Continuing normally.";
 				}
-				$queryResult->close(); // close result*/
 			} else {
 				$this->status = 4; // query failed
 				$this->statusCodes[4] .= ": " . $innerConn->error; // append error
@@ -140,7 +149,9 @@ class MySQLConnector {
 		// CHECK VALIDITY OF RESULT
         if(!$result){ // test to see if result exists
 			$this->status = 2; // query is blank
-        } else { 
+		} else if(!method_exists($result,"fetch_object")) {  // check if he fetch object method exists
+       		$this->status = 2; // query is blank
+		} else { 
 			$row = 0;
 			while ($obj = $result->fetch_object()) {
 				$parsedOut[$row] = $obj; // push result
