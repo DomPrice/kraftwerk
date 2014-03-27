@@ -210,9 +210,9 @@ class KraftwerkModel extends MySQLConnector {
 	private function validate_data_types($conditions) {
 		$output = true;
 		foreach($conditions as $field => $value) {
-			if($this->is_field_type_datetime($field) && !$this->is_mysql_datetime($value)) {
+			if($this->is_field_type_datetime($field) && !$this->is_valid_mysql_datetime($value)) {
 				$output = false;
-			} elseif($this->is_field_type_datetime($field) && !$this->is_mysql_date($value)) {
+			} elseif($this->is_field_type_datetime($field) && !$this->is_valid_mysql_date($value)) {
 				$output = false;	
 			} elseif($this->is_field_type_number($field) && !is_numeric($value)) {
 				$output = false;	
@@ -403,6 +403,20 @@ class KraftwerkModel extends MySQLConnector {
 	}
 	
 	/*
+		RETURNS WHETHER VALUE IS VALID MYSQL DATE
+	*/
+	protected function is_valid_mysql_date($strIn) {
+    	return preg_match("/^([0-9]{4})-([0-9]{2})-([0-9]{2})$/", $strIn);
+	}
+
+	/*
+		RETURNS WHETHER VALUE IS VALID MYSQL DATETIME
+	*/
+	protected function is_valid_mysql_datetime($strIn) {
+		return preg_match("/^\d{4}-\d{2}-\d{2} [0-2][0-3]:[0-5][0-9]:[0-5][0-9]$/", $strIn);
+	}
+	
+	/*
 		RETURNS WHETHER OR NOT THE SELECTED FIELD IS NUMERIC
 		@returns true/false
 	*/
@@ -461,20 +475,6 @@ class KraftwerkModel extends MySQLConnector {
 			$output = true;
 		}
 		return $output;
-	}
-
-	/*
-		RETURNS WHETHER VALUE IS VALID MYSQL DATE
-	*/
-	protected function is_mysql_date($strIn) {
-    	return preg_match("/^([0-9]{4})-([0-9]{2})-([0-9]{2})$/", $strIn);
-	}
-
-	/*
-		RETURNS WHETHER VALUE IS VALID MYSQL DATETIME
-	*/
-	protected function is_mysql_datedime($strIn) {
-		return preg_match("/^\d{4}-\d{2}-\d{2} [0-2][0-3]:[0-5][0-9]:[0-5][0-9]$/", $strIn);
 	}
 
 }
