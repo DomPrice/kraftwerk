@@ -15,11 +15,11 @@
 	GENERATE INTERFACE LIST
 	This is useful in generating options for a select list
 */
-function kw_form_select($itemArray,$valueVar,$optionVar,$default="") {
+function kw_form_select($itemArray,$valueVar,$optionVar,$options=array()) {
 	$SPECIAL_CHARS = get_html_translation_table(HTML_ENTITIES); // translate special characters
 	$optionsHTML = "<option value=\"\">--</options>\n";
 	for($i=0; $i<count($itemArray); $i++) {
-		if($itemArray[$i][$valueVar] == $default) {
+		if($itemArray[$i][$valueVar] == $options["default"]) {
 			$selected = " selected";
 		} else {
 			$selected = "";
@@ -33,10 +33,10 @@ function kw_form_select($itemArray,$valueVar,$optionVar,$default="") {
 	GENERATE YEAR LIST
 	This is useful in generating options for a years list
 */
-function kw_form_select_years($start,$end,$default) {
+function kw_form_select_years($start,$end,$options=array()) {
 	$optionsHTML = "<option value=\"\">--</options>\n";
 	for($i=intval($start); $i<=intval($end); $i++) {
-		if(intval($i) == intval($default)) {
+		if(intval($i) == intval($options["default"])) {
 			$selected = " selected";
 		} else {
 			$selected = "";
@@ -50,11 +50,17 @@ function kw_form_select_years($start,$end,$default) {
 	GENERATE MONTH LIST
 	This is useful in generating options for a month list
 */
-function kw_form_select_months($year,$month,$default) {
-	$monthNames		= array("January","February","March","April","May","June","July","August","September","October","November","December");
+function kw_form_select_months($options=array()) {
+	if($options["long"] == true) {
+		$monthNames		= array("January","February","March","April","May","June","July","August","September","October","November","December");
+	} else if($options["short"] == true) {
+		$monthNames		= array("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec");
+	} else {
+		$monthNames		= array(1,2,3,4,5,6,7,8,9,10,11,12);
+	}
 	$optionsHTML 	= "<option value=\"\">--</options>\n";
 	for($i=0; $i<intval(12); $i++) {
-		if(intval($i+1) == intval($default)) {
+		if(intval($i+1) == intval($options["default"])) {
 			$selected = " selected";
 		} else {
 			$selected = "";
@@ -68,12 +74,16 @@ function kw_form_select_months($year,$month,$default) {
 	GENERATE DAY LIST
 	This is useful in generating options for a monthly day list
 */
-function kw_form_select_monthdays($year,$month,$default) {
+function kw_form_select_monthdays($month="",$options=array()) {
 	$monthDays		= array(31,28,31,30,31,30,31,31,30,31,30,31);
-	$getDayCount	= $monthDays[intval($month)];
+	if($month != "") {
+		$getDayCount	= $monthDays[intval($month)];
+	} else {
+		$getDayCount	= 31; // default to 31
+	}
 	$optionsHTML 	= "<option value=\"\">--</options>\n";
 	for($i=1; $i<=intval($getDayCount); $i++) {
-		if($i == $default) {
+		if($i == $options["default"]) {
 			$selected = " selected";
 		} else {
 			$selected = "";
