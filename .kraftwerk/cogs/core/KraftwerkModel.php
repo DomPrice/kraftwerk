@@ -222,6 +222,20 @@ class KraftwerkModel extends MySQLConnector {
 		return $output;
 	}
 	
+	/*
+		VALIDATES WHETHER THE INCOMING DATA IS PART OF THE MODEL
+		@returns true/false
+ 	*/
+	public function valid($data) {
+		$fields = $this->fields();
+		foreach($data as $data_field) {
+			if(!array_key_exists($data_field,$fields)) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
 	/* 
 		RETURN THE EXTRAPOLATED TABLE NAME THAT KRAFTWERK WILL ATTEMPT TO ACCESS WHEN DOING SELF QUERIES ON A MODEL EXTENDING THIS CLASS
 		returns the extrapolated table name
