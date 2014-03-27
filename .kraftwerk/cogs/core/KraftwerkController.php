@@ -28,9 +28,49 @@ class KraftwerkController {
 	}
 	
 	/*
+		REDIRECT TO
+		Redirects to specified action, will automatically find controller
+		@param $action = action to redirect to
+	*/	
+	public function redirect_to($action) {
+		
+		// get current controller
+		$controller_name = $this->instance_of();
+		
+		// remove the controller label from the end of the class, this will be the folder
+		$controller_slug = preg_replace('~Controller(?!.*Controller)~', '', $controller_name); 
+		
+		// clean slug
+		$action = preg_replace("/[^a-zA-Z0-9\s]/", "_", $action);
+		
+		// redirect
+		header("location:  /" . $controller_slug . "/" . $action);
+	}
+	
+	/*
+		REDIRECT
+		Alias of redirect_to
+		@param $action = action to redirect to
+	*/	
+	public function redirect($action) {
+		$this->redirect_to($action);
+	}
+	
+	/*
+		REDIRECT TO URL
+		Redirect to specified url location
+		@param $url = url to redirect to
+	*/	
+	
+	public function redirect_to_url($url) {
+		header("location:  " . $url);
+	}
+	
+	/*
 		RENDER
 		Renders the current template
-		@param 
+		@param $view = name of view to render, kraftwerk will look for view file
+		@param $options = variables to be sent to view for display/manipulation
 	*/
 	public function render($view="",$options=array()) {
 		global $kraftwerk;
