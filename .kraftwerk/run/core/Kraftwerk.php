@@ -156,12 +156,21 @@ class Kraftwerk {
 		@return true/false
 	*/
 	public function loadAction($action) {
-		$this->CURRENT_ACTION = $action;
-		$function = '$this->CURRENT_CONTROLLER->' . $this->CURRENT_ACTION;
-		if(method_exists($this->CURRENT_CONTROLLER->instance_of(),$action)) {
-			eval($function . '();');
-		} else {
-			die("Kraftwerk received a request on controller:[" . $this->CURRENT_CONTROLLER->instance_of() . "] that it does not have an action for. [" . $action . "];");
+		try {
+			$this->CURRENT_ACTION = $action;
+			$function = '$this->CURRENT_CONTROLLER->' . $this->CURRENT_ACTION;
+			if(method_exists($this->CURRENT_CONTROLLER->instance_of(),$action)) {
+				$reflection = new ReflectionMethod($this->CURRENT_CONTROLLER, $this->CURRENT_ACTION);
+				if($reflection->isPublic()) {
+					eval($function . '();');
+				} else {
+					die("Kraftwerk cannot call action [" . $action . "] on controller [" . $this->CURRENT_CONTROLLER->instance_of() . "]; Action is not public.");
+				}
+			} else {
+				die("Kraftwerk received a request on controller:[" . $this->CURRENT_CONTROLLER->instance_of() . "] that it does not have an action for. [" . $action . "];");
+			}
+		} catch(Exception $e) {
+			die("Kraftwerk cannot call action [" . $action . "] on controller [" . $this->CURRENT_CONTROLLER->instance_of() . "];");
 		}
 	}
 	
