@@ -38,7 +38,7 @@ class KraftwerkController {
 		$controller_name = $this->instance_of();
 		
 		// remove the controller label from the end of the class, this will be the folder
-		$controller_slug = preg_replace('~Controller(?!.*Controller)~', '', $controller_name); 
+		$controller_slug = strtolower(preg_replace('~Controller(?!.*Controller)~', '', $controller_name)); 
 		
 		// clean slug
 		$action = preg_replace("/[^a-zA-Z0-9\s]/", "_", $action);
