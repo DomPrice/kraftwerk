@@ -37,5 +37,9 @@ class KraftwerkLogger extends FileConnector {
 		
 	}
 	
+	public function log_error($error) {
+		
+	}
+	
 }
 ?>

@@ -58,6 +58,39 @@ class KraftwerkModel extends MySQLConnector {
 	}
 	
 	/*
+		SEARCH FUNCTIONS, FIND BY CONDTIONS
+	*/
+	public function find_by($conditions = array()) {
+		
+		// SET TABLE
+		$table = $this->get_table(); // get table
+		$result = NULL;
+		
+		// construct query
+		if($conditions != NULL && $conditions != "") {
+
+			// needed for mysql_real_escape_string
+			$innerConn = new mysqli($this->DB_HOST, $this->DB_USERNAME, $this->DB_PASSWORD);
+			
+			// make sure connection valid
+			if(!mysqli_connect_errno()) {
+				$query = "SELECT * FROM " . $table . " WHERE 1=1 "; 
+				if((count($conditions) > 0) && $this->validate_data_types($conditions,$innerConn)) {
+					$query .= " AND" . $this->generate_params_clause($conditions,$innerConn);
+				}
+				$query .= ";";
+				$result = $this->runQuery($query);
+				$this->data = $result[0]; // save result internally
+				
+				// close connection, we'll use another to execute
+				$innerConn->close();
+			}
+		}
+		
+		return $result;
+	}
+	
+	/*
 		FIND ALL
 		Returns all pets that meet the criteria specified in $opts
 		@param $conditions parameters of query

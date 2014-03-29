@@ -77,10 +77,12 @@ class KraftwerkController {
 		global $kw_config;
 
 		// REGISTER GLOBALS
-		foreach($options as $key => $value) {
-			if($GLOBALS[$key] == "" || $GLOBALS[$key] == NULL) {
-				$GLOBALS[$key] = $value;
-				eval("global $$key;"); //register global
+		if($options != NULL && $options != "" && count($options) > 0) {
+			foreach($options as $key => $value) {
+				if($GLOBALS[$key] == "" || $GLOBALS[$key] == NULL) {
+					$GLOBALS[$key] = $value;
+					eval("global $$key;"); //register global
+				}
 			}
 		}
 		
@@ -93,8 +95,15 @@ class KraftwerkController {
 		
 		// OUTPUT TO BUFFER FOR LATER INSERTION INTO TEMPLATE
 		ob_start();
-		include_once(realpath($_SERVER['DOCUMENT_ROOT']) . $path);
-		$GLOBALS["$yield"] = ob_get_clean(); // send result to globals
+		if(file_exists(realpath($_SERVER['DOCUMENT_ROOT']) . $path)) {
+			if(!include_once(realpath($_SERVER['DOCUMENT_ROOT']) . $path)) {
+				die("Kraftwerk cannot open view file [" . $this->extrapolate_view($view) . "]");
+			}
+			$GLOBALS["$yield"] = ob_get_clean(); // send result to globals
+		} else {
+			die("Kraftwerk cannot find view file [" . $this->extrapolate_view($view) . "]");
+		}
+
 
 		// YIELD FUNCTION / Yields the content from within the template
 		function yield() {
