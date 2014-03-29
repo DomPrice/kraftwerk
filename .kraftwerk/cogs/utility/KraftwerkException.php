@@ -14,8 +14,13 @@ class KraftwerkException extends Exception {
 	/*
 		Exception Handler Constructor
 	*/
-	public function KraftwerkException() {
-		
+	public function __construct() { }
+	
+	/*
+		Throw Error 
+	*/
+	public function throw_error($error) {
+		die($error);
 	}
 }
 ?>

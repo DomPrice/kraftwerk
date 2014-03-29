@@ -97,11 +97,15 @@ class KraftwerkController {
 		ob_start();
 		if(file_exists(realpath($_SERVER['DOCUMENT_ROOT']) . $path)) {
 			if(!include_once(realpath($_SERVER['DOCUMENT_ROOT']) . $path)) {
-				die("Kraftwerk cannot open view file [" . $this->extrapolate_view($view) . "]");
+				$error = "Kraftwerk cannot open view file [" . $this->extrapolate_view($view) . "]";	
+				$kraftwerk->logger->log_error($error . " | details: " . $e->getMessage());
+				$kraftwerk->exception->throw_error($error);	
 			}
 			$GLOBALS["$yield"] = ob_get_clean(); // send result to globals
 		} else {
-			die("Kraftwerk cannot find view file [" . $this->extrapolate_view($view) . "]");
+			$error = "Kraftwerk cannot find view file [" . $this->extrapolate_view($view) . "]";	
+			$kraftwerk->logger->log_error($error . " | details: " . $e->getMessage());
+			$kraftwerk->exception->throw_error($error);	
 		}
 
 
@@ -124,9 +128,13 @@ class KraftwerkController {
 				include_once($snippet_path);
 			} else {
 				if($snippet == "") {
-					die("Kraftwerk expects a snippet name and it was not found.");
+					$error = "Kraftwerk expects a snippet name and it was not found.";	
+					$kraftwerk->logger->log_error($error . " | details: " . $e->getMessage());
+					$kraftwerk->exception->throw_error($error);	
 				} else {
-					die("Kraftwerk cannot find the specified snippet file [" . $snippet . "]");
+					$error = "Kraftwerk cannot find the specified snippet file [" . $snippet . "]";	
+					$kraftwerk->logger->log_error($error . " | details: " . $e->getMessage());
+					$kraftwerk->exception->throw_error($error);	
 				}
 			}
 		}
@@ -142,9 +150,13 @@ class KraftwerkController {
 			include_once($template_path);
 		} else {
 			if($this->template == "") {
-				die("Kraftwerk cannot find a template associated with this view. Please check your controller to verify a template has been specified.");
+				$error = "Kraftwerk cannot find a template associated with this view. Please check your controller to verify a template has been specified.";	
+				$kraftwerk->logger->log_error($error . " | details: " . $e->getMessage());
+				$kraftwerk->exception->throw_error($error);	
 			} else {
-				die("Kraftwerk cannot find the specified template file [" . $this->template . "]");
+				$error = "Kraftwerk cannot find the specified template file [" . $this->template . "]";	
+				$kraftwerk->logger->log_error($error . " | details: " . $e->getMessage());
+				$kraftwerk->exception->throw_error($error);	
 			}
 		}
 		

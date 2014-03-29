@@ -141,7 +141,7 @@ class Kraftwerk {
 		} else {
 			$error = "Kraftwerk received a request that it does not have a controller for. [" . $controller . "];";
 			$this->logger->log_error($error);
-			die($error);	
+			$this->exception->throw_error($error);
 		}
 		
 		// load the controller class
@@ -149,8 +149,8 @@ class Kraftwerk {
 			@eval('$this->CURRENT_CONTROLLER = new ' . $this->controllerToClassName($controller) . '();'); // load into ENV
 		} catch (Exception $e) {
 			$error = "Kraftwerk failed to load controller: [" . $controller . "];";	
-			$this->logger->log_error($error);
-			die($error);	
+			$this->logger->log_error($error . " | details: " . $e->getMessage());
+			$this->exception->throw_error($error);	
 		}
 		
 		// return true/false on whether controller successfully loaded
@@ -178,17 +178,17 @@ class Kraftwerk {
 				} else {
 					$error = "Kraftwerk cannot call action:[" . $action . "] on controller:[" . $this->CURRENT_CONTROLLER->instance_of() . "]; Action is not public.";	
 					$this->logger->log_error($error);
-					die($error);	
+					$this->exception->throw_error($error);
 				}
 			} else {
 				$error = "Kraftwerk received a request on controller:[" . $this->CURRENT_CONTROLLER->instance_of() . "] that it does not have an action for. [" . $action . "];";	
 				$this->logger->log_error($error);
-				die($error);	
+				$this->exception->throw_error($error);
 			}
 		} catch(Exception $e) {
 			$error = "Kraftwerk cannot call action:[" . $action . "] on controller:[" . $this->CURRENT_CONTROLLER->instance_of() . "];";	
-			$this->logger->log_error($error);
-			die($error);	
+			$this->logger->log_error($error . " | details: " . $e->getMessage());
+			$this->exception->throw_error($error);
 		}
 	}
 	
