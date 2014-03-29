@@ -98,13 +98,13 @@ class KraftwerkController {
 		if(file_exists(realpath($_SERVER['DOCUMENT_ROOT']) . $path)) {
 			if(!include_once(realpath($_SERVER['DOCUMENT_ROOT']) . $path)) {
 				$error = "Kraftwerk cannot open view file [" . $this->extrapolate_view($view) . "]";	
-				$kraftwerk->logger->log_error($error . " | details: " . $e->getMessage());
+				$kraftwerk->logger->log_error($error);
 				$kraftwerk->exception->throw_error($error);	
 			}
 			$GLOBALS["$yield"] = ob_get_clean(); // send result to globals
 		} else {
 			$error = "Kraftwerk cannot find view file [" . $this->extrapolate_view($view) . "]";	
-			$kraftwerk->logger->log_error($error . " | details: " . $e->getMessage());
+			$kraftwerk->logger->log_error($error);
 			$kraftwerk->exception->throw_error($error);	
 		}
 
@@ -129,11 +129,11 @@ class KraftwerkController {
 			} else {
 				if($snippet == "") {
 					$error = "Kraftwerk expects a snippet name and it was not found.";	
-					$kraftwerk->logger->log_error($error . " | details: " . $e->getMessage());
+					$kraftwerk->logger->log_error($error);
 					$kraftwerk->exception->throw_error($error);	
 				} else {
 					$error = "Kraftwerk cannot find the specified snippet file [" . $snippet . "]";	
-					$kraftwerk->logger->log_error($error . " | details: " . $e->getMessage());
+					$kraftwerk->logger->log_error($error);
 					$kraftwerk->exception->throw_error($error);	
 				}
 			}
@@ -151,11 +151,11 @@ class KraftwerkController {
 		} else {
 			if($this->template == "") {
 				$error = "Kraftwerk cannot find a template associated with this view. Please check your controller to verify a template has been specified.";	
-				$kraftwerk->logger->log_error($error . " | details: " . $e->getMessage());
+				$kraftwerk->logger->log_error($error);
 				$kraftwerk->exception->throw_error($error);	
 			} else {
 				$error = "Kraftwerk cannot find the specified template file [" . $this->template . "]";	
-				$kraftwerk->logger->log_error($error . " | details: " . $e->getMessage());
+				$kraftwerk->logger->log_error($error);
 				$kraftwerk->exception->throw_error($error);	
 			}
 		}
