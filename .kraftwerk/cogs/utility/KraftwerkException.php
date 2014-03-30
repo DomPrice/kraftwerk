@@ -19,8 +19,27 @@ class KraftwerkException extends Exception {
 	/*
 		Throw Error 
 	*/
-	public function throw_error($error) {
-		die($error);
+	public function throw_error($error_message,$e="") {
+		global $kraftwerk;
+		global $kw_config;
+		if(isset($kw_config->error_page) && $kw_config->error_page != NULL && $kw_config->error_page != "") { // make sure we don't have a custom error page
+			header("Location: /" . $kw_config->error_page);
+			exit;
+		} else { // use kraftwerk's default error handling page
+			$error_template = realpath($_SERVER['DOCUMENT_ROOT']) . $kw_config->hosted_dir . $kraftwerk->ASSETS_DIR . "/error_template.php";
+			$error_template_logo = $kraftwerk->ASSETS_DIR . "/kwlogo.png";
+			$error_stacktrace = $e;
+			if(file_exists($error_template)) {
+				try {
+					include_once($error_template);
+					exit;
+				} catch(Exception $e) {
+					die("Error template not found, rendering text only error message: [" . $error_message . "]");
+				}
+			} else {
+				die($error_message);
+			}
+		}
 	}
 }
 ?>
