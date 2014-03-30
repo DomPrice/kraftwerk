@@ -21,6 +21,7 @@ class Kraftwerk {
 	var $MODELS_DIR				= "/application/models";
 	var $VIEWS_DIR				= "/application/views";
 	var $COGS_DIR				= "/cogs";
+	var $ASSETS_DIR				= "/assets";
 	
 	// OTHER STRUCTS
 	var $CORE_LIB_LOADED 		= array();
@@ -62,6 +63,7 @@ class Kraftwerk {
 		$this->MODELS_DIR			= "/" . $kw_root . "/application/models";
 		$this->VIEWS_DIR			= "/" . $kw_root . "/application/views";
 		$this->COGS_DIR				= "/" . $kw_root . "/cogs";
+		$this->ASSETS_DIR			= "/" . $kw_root . "/assets";
 	}
 	
 	/* 
