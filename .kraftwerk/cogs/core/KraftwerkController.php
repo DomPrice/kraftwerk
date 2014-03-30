@@ -120,9 +120,17 @@ class KraftwerkController {
 		}
 		
 		// SNIPPET FUNCTION / Include a snippet from the snippet directory
-		function snippet($snippet="") {
+		function snippet($snippet="",$options="") {
 			global $kraftwerk;
 			global $kw_config;
+			
+			// REGISTER GLOBALS
+			if($options != NULL && $options != "" && count($options) > 0) {
+				foreach($options as $key => $value) {
+					eval("global $$key;"); //register global
+				}
+			}
+
 			$snippet_path = realpath($_SERVER['DOCUMENT_ROOT']) . $kw_config->hosted_dir . $kraftwerk->VIEWS_DIR . "/_layouts/_snippets/" . $snippet . ".php";
 			if(file_exists($snippet_path)) {
 				include_once($snippet_path);
@@ -140,8 +148,8 @@ class KraftwerkController {
 		}
 		
 		// alias
-		function kw_snippet($snippet="") {
-			snippet($snippet);
+		function kw_snippet($snippet="",$options="") {
+			snippet($snippet,$options);
 		}
 
 		// RENDER TEMPLATE

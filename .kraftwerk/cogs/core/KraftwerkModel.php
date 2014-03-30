@@ -25,6 +25,13 @@ class KraftwerkModel extends MySQLConnector {
 	}
 	
 	/*
+		RETURNS THE DATA SET FOR THIS OBJECT
+	*/
+	public function data() {
+		return $this->data;
+	}
+	
+	/*
 		SEARCH FUNCTIONS
 	*/
 	public function find($id, $conditions = array()) {
