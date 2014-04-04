@@ -77,13 +77,13 @@ function kw_form_select_months($options=array()) {
 function kw_form_select_monthdays($month="",$options=array()) {
 	$monthDays		= array(31,28,31,30,31,30,31,31,30,31,30,31);
 	if($month != "") {
-		$getDayCount	= $monthDays[intval($month)];
+		$getDayCount	= $monthDays[intval($month)+1];
 	} else {
 		$getDayCount	= 31; // default to 31
 	}
 	$optionsHTML 	= "<option value=\"\">--</options>\n";
 	for($i=1; $i<=intval($getDayCount); $i++) {
-		if($i == $options["default"]) {
+		if($i == intval($options["default"])) {
 			$selected = " selected";
 		} else {
 			$selected = "";
