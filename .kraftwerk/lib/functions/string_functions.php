@@ -47,12 +47,33 @@ function kw_alphanumspaces_str($strIn) {
 }
 
 /*
+	UTILITY FUNCTION: FORMAT PHONE NUMBER
+*/
+function kw_phonenumber_str($strIn) {
+	$num = preg_replace('/[^0-9]/', '', $num);
+	$len = strlen($num);
+	if($len == 7) {
+		$num = preg_replace('/([0-9]{3})([0-9]{4})/', '$1-$2', $num);
+	} elseif($len == 10) {
+		$num = preg_replace('/([0-9]{3})([0-9]{3})([0-9]{4})/', '($1) $2-$3', $num);
+	}
+	return $num;
+}
+
+/*
 	UTILITY FUNCTION: MAKE SURE PASSWORD IS ALPHA NUMERIC + !@#$%^&*()
 */
 function kw_isemail($strIn) {
-	$output = false;
 	$strIn = strtolower($strIn);
-	if(eregi("^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$", $strIn)) {
+	return kw_validate_format($strIn,"^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$");
+}
+
+/*
+	UTILITY FUNCTION: VALIDATE FORMAT
+*/
+function kw_validate_format($str,$format) {
+	$output = false;
+	if(eregi($format, $strIn)) {
 		$output = true;
 	}	
 	return $output;

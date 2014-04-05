@@ -7,7 +7,7 @@
 		
 	developer: Dom Price (info@domprice.com)
 	created: 04/19/2010
-	last:	 03/12/2014
+	last:	 04/05/2014
 
 	(c) 2010-2014 - Dom Price - http://www.domprice.com
 	This software is open source and licensed under the standard MIT license.
@@ -19,6 +19,9 @@
 // LOAD HEADERS
 
 //#################################################################################
+
+// LOAD CONSTANTS
+include_once(dirname(__FILE__) . '/dep/constants.php');
 
 // LOAD KRAFTWERK APPLICATION
 include_once(dirname(__FILE__) . '/../config/kwconfig.php');
