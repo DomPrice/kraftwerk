@@ -24,7 +24,7 @@ function kw_form_select($itemArray,$valueVar,$optionVar,$options=array()) {
 		} else {
 			$selected = "";
 		}
-		$optionsHTML .= "<option value=\"" . $itemArray[$i][$valueVar] . "\"" . $selected . ">" . strtr($itemArray[$i][$optionVar],$SPECIAL_CHARS) . "</options>\n";
+		$optionsHTML .= "<option value=\"" . $itemArray[$i][$valueVar] . "\"" . $selected . ">" . strtr($itemArray[$i][$optionVar],$SPECIAL_CHARS) . "</option>\n";
 	}
 	return $optionsHTML;
 }
@@ -65,7 +65,7 @@ function kw_form_select_months($options=array()) {
 		} else {
 			$selected = "";
 		}
-		$optionsHTML .= "<option value=\"" . intval($i+1) . "\"" . $selected . ">" . $monthNames[$i] . "</options>\n";	
+		$optionsHTML .= "<option value=\"" . intval($i+1) . "\"" . $selected . ">" . $monthNames[$i] . "</option>\n";	
 	}
 	return $optionsHTML;
 }
@@ -88,7 +88,7 @@ function kw_form_select_monthdays($month="",$options=array()) {
 		} else {
 			$selected = "";
 		}
-		$optionsHTML .= "<option value=\"" . $i . "\"" . $selected . ">" . $i . "</options>\n";	
+		$optionsHTML .= "<option value=\"" . $i . "\"" . $selected . ">" . $i . "</option>\n";	
 	}
 	return $optionsHTML;
 }

@@ -17,10 +17,18 @@ class KraftwerkModel extends MySQLConnector {
 	// If set in a child class that extends KraftwerkModel, Kraftwerk will attempt to write to this table instead.
 	protected $use_table = NULL; 
 	
+	// VALIDATORS
+	public $validators = NULL;
+	
+	// ERROR MESSAGES
+	public $field_errors = array();
+
+	
 	/*
 		CONSTRUCTOR
 	*/
 	public function __construct() { // schema is optional
+		$this->validators = new KraftwerkValidator();
 		parent::__construct($host,$user,$pass,$schema);
 	}
 	
@@ -600,6 +608,55 @@ class KraftwerkModel extends MySQLConnector {
 		}
 		return $output;
 	}
+	
+	/*
+		###########################################################
+							VAIDATION FUNCTIONS
+		###########################################################
+	*/
 
+	// VALIDATE FORMAT OF STRING
+	public function validate_format($strIn,$format) {
+		$output = false;
+		if(preg_match($format, $strIn)) {
+			$output = true;
+		}	
+		return $output;
+	}
+	
+	// CHECK THE DATA AGAINST THE SPECIFIED VALIDATORS
+	public function validate_data($data) {
+		$output = true;
+		$this->field_errors = array(); // reset field errors
+		$formats = $this->validators->get_formats();
+		$failed_count = 0;
+
+		foreach($data as $key => $value) {
+			if(isset($formats["$key"]) && $formats["$key"] != "" &&  $formats["$key"] != NULL) {			
+				if(!$this->validate_format($value,$formats["$key"])) {
+					$this->field_errors[$failed_count] = $key; 
+					$output = false;
+					$failed_count++;
+				}
+			}
+		}
+		return $output;
+	}
+	
+	/// ALIAS FOR validate_data()
+	public function validate($data) {
+		return $this->validate_data($data);
+	}
+	
+	// RENDER ERROR MESSAGES
+	public function validation_errors() {
+		$errors = array();
+		foreach($this->field_errors as $index => $field) {
+			$errors[$index]  = "The format of " . $field . " is not valid.";
+		}
+		return $errors;
+	}
+
+	
 }
 ?>

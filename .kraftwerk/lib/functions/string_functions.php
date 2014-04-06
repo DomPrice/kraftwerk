@@ -49,7 +49,7 @@ function kw_alphanumspaces_str($strIn) {
 /*
 	UTILITY FUNCTION: FORMAT PHONE NUMBER
 */
-function kw_phonenumber_str($strIn) {
+function kw_usphonenumber_str($strIn) {
 	$num = preg_replace('/[^0-9]/', '', $num);
 	$len = strlen($num);
 	if($len == 7) {
@@ -71,9 +71,9 @@ function kw_isemail($strIn) {
 /*
 	UTILITY FUNCTION: VALIDATE FORMAT
 */
-function kw_validate_format($str,$format) {
+function kw_validate_format($strIn,$format) {
 	$output = false;
-	if(eregi($format, $strIn)) {
+	if(preg_match($format, $strIn)) {
 		$output = true;
 	}	
 	return $output;

@@ -12,7 +12,7 @@ class KraftwerkController {
 	
 	public $view = NULL; // placeholder for view
 	public $template = NULL; // template to use
-	
+
 	/* 
 		CONSTRUTOR
 	*/
@@ -75,10 +75,14 @@ class KraftwerkController {
 	public function render($view="",$options=array()) {
 		global $kraftwerk;
 		global $kw_config;
+		
+		// SAVE RENDER VARS
+		global $kw_render_vars;
+		$kw_render_vars = $options;
 
 		// REGISTER GLOBALS
-		if($options != NULL && $options != "" && count($options) > 0) {
-			foreach($options as $key => $value) {
+		if($kw_render_vars != NULL && $kw_render_vars != "" && count($kw_render_vars) > 0) {
+			foreach($kw_render_vars as $key => $value) {
 				if($GLOBALS[$key] == "" || $GLOBALS[$key] == NULL) {
 					$GLOBALS[$key] = $value;
 					eval("global $$key;"); //register global
@@ -123,10 +127,11 @@ class KraftwerkController {
 		function snippet($snippet="",$options="") {
 			global $kraftwerk;
 			global $kw_config;
+			global $kw_render_vars;
 			
-			// REGISTER GLOBALS
-			if($options != NULL && $options != "" && count($options) > 0) {
-				foreach($options as $key => $value) {
+			// REGISTER GLOBALS, THESE SHOULD ALREADY BE SAVED AT RENDER
+			if($kw_render_vars != NULL && $kw_render_vars != "" && count($kw_render_vars) > 0) {
+				foreach($kw_render_vars as $key => $value) {
 					eval("global $$key;"); //register global
 				}
 			}
