@@ -40,6 +40,20 @@ class KraftwerkModel extends MySQLConnector {
 	}
 	
 	/*
+		UPDATE THE DATA FIELDS IN THE OBJECT TO SPECIFIED HASH
+	*/
+	public function update($update_hash=array()) {
+		//$update_hash
+	}
+	
+	/*
+		ALIAS FOR UPDATE
+	*/
+	public function update_data($update_hash=array()) {
+		$this->update($update_hash);
+	}
+	
+	/*
 		SEARCH FUNCTIONS
 	*/
 	public function find($id, $conditions = array()) {
@@ -361,6 +375,8 @@ class KraftwerkModel extends MySQLConnector {
 		// set plurality
 		if(substr($name, -2) == "sh" || substr($name, -2) == "ch" || substr($name, -1) == "s") {
 			$name .= "es";
+		} elseif(substr($name, -1) == "y") {
+			$name .= "ies";
 		} else {
 			$name .= "s";
 		}

@@ -77,7 +77,7 @@ function kw_form_select_months($options=array()) {
 function kw_form_select_monthdays($month="",$options=array()) {
 	$monthDays		= array(31,28,31,30,31,30,31,31,30,31,30,31);
 	if($month != "") {
-		$getDayCount	= $monthDays[intval($month)+1];
+		$getDayCount	= $monthDays[intval($month)-1];
 	} else {
 		$getDayCount	= 31; // default to 31
 	}
