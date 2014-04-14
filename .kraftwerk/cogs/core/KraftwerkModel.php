@@ -43,7 +43,11 @@ class KraftwerkModel extends MySQLConnector {
 		UPDATE THE DATA FIELDS IN THE OBJECT TO SPECIFIED HASH
 	*/
 	public function update($update_hash=array()) {
-		//$update_hash
+		$new_data = new stdClass();
+		foreach ($update_hash as $key => $value) {
+    		$new_data->$key = $value;
+		}
+		$this->data = $new_data;
 	}
 	
 	/*
@@ -142,7 +146,7 @@ class KraftwerkModel extends MySQLConnector {
 				$query = "SELECT * FROM " . $table;
 				
 				// WHERE CLAUSE
-				if($this->validate_data_types($conditions)) {	
+				if($this->validate_data_types($conditions) && $conditions != NULL && $conditions != array()) {	
 					$query .= " WHERE" . $this->generate_params_clause($conditions,$innerConn);
 				}
 				
@@ -376,7 +380,7 @@ class KraftwerkModel extends MySQLConnector {
 		if(substr($name, -2) == "sh" || substr($name, -2) == "ch" || substr($name, -1) == "s") {
 			$name .= "es";
 		} elseif(substr($name, -1) == "y") {
-			$name .= "ies";
+			$name = substr($name, 0, -1) . "ies";
 		} else {
 			$name .= "s";
 		}
