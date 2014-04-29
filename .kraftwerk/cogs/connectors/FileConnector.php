@@ -15,23 +15,27 @@ class FileConnector {
 	// CONTROL VARIABLES FOR THIS CONNECTOR
 	protected $directory 		= ""; 			// directory the files will be uploaded to, this must be a FULL PATH
 	protected $accept			= array("*"); 	// only these mime-types will be accepted
-	protected $maxSize			= 0;			// default to PHP.ini max post size
-	protected $fileStream		= ""; 			// fileStream currently being handled
+	protected $max_size			= 0;			// default to PHP.ini max post size
+	protected $filestream		= ""; 			// fileStream currently being handled
+	protected $filepath			= NULL;			// Currently open file
 
 	// UPLOADED FILE HISTORY FOR THIS SCRIPT RUN WILL BE STORED HERE
-	public $storedFiles			= array();
+	public $stored_files		= array();
 
 	// ERROR CODE HANDLING
 	protected $status 		= 0;
 	protected $statusCodes 	= array();
+	
+	// FILE TO CONNECT TO
+	
 
 	/* 
 		CONSTRUTOR
 		@param $directory 	= files will be saved to this directory, must be full path
 		@param $accept		= array of accepted mime types, leave blank or * for all types
-		@param $maxSize		= maximum size in bytes allowable for upload
+		@param $max_size		= maximum size in bytes allowable for upload
 	*/
-	public function __construct($directory="",$accept="",$maxSize="") {
+	public function __construct($directory="",$accept="",$max_size="") {
 
 		// Set parent directory for uploads
 		if(isset($directory) && $directory != "") {
@@ -46,20 +50,121 @@ class FileConnector {
 		}
 
 		// Set accepted maximum size for this upload connector
-		if(isset($maxSize) && $maxSize != "" && count($maxSize) != 0) {
-			$this->maxSize = $maxSize;
+		if(isset($max_size) && $max_size != "" && count($max_size) != 0) {
+			$this->max_size = $max_size;
 		} else {
-			$this->maxSize = intval($this->iniReturnBytes(ini_get('post_max_size'))-1000);
+			$this->max_size = intval($this->iniReturnBytes(ini_get('post_max_size'))-1000);
 		}
 
 		// SET ERROR CODES
 		$this->statusCodes[0] = "No Errors, Upload Connector is Idle";
 		$this->statusCodes[1] = "File Upload Failed, the selected file could not be saved to the File System.";
 		$this->statusCodes[2] = "File Upload Failed, the selected file is of an invalid file type.";
-		$this->statusCodes[3] = "File Upload Failed, the selected file is greater than " . $this->maxSize . " bytes";
+		$this->statusCodes[3] = "File Upload Failed, the selected file is greater than " . $this->max_size . " bytes";
 		$this->statusCodes[4] = "File Rename Failed";
 
 	}
+	
+	/*
+		OPEN FILE
+	*/
+	public function open($filepath) {
+		if(file_exists($filepath)) { // check if exists
+			if(!is_dir($filepath)) { // check if dir
+				if(is_readable($filepath)) { // check if readable
+					$this->filepath = $filepath; // set the file path pointer
+				} else {
+					$response->message = "File is not readable: [" . $filepath . "]";
+					$response->status = false;	
+				}
+			} else {
+				$response->message = "Specified path: [" . $filepath . "] is a directory.";
+				$response->status = false;		
+			}
+		} else { // if file is not found, the connector will create it
+			if(!is_dir($filepath)) { // check if dir
+				$this->filepath = $filepath; // set the file path pointer
+				$this->write(NULL); // create file
+				
+				$response->message = "File created: [" . $filepath . "]";
+				$response->status = false;
+			} else {
+				$response->message = "Specified path: [" . $filepath . "] is a directory.";
+				$response->status = false;		
+			}
+		}
+	}
+	
+	/*
+		CLOSE FILE
+	*/
+	public function close() {
+		$this->filepath = NULL; // close file path
+	}
+	
+	/*
+		WRITE TO CURRENTLY OPEN FILE
+		@param $str = data to write to file
+		@param $opts = options for file write
+	*/
+	public function write($data,$opts=array()) {
+		
+		// set response vars
+		$response = new StdClass();
+		$response->status = true;
+		
+		$mode = "overwrite"; // default
+		if(strtolower($opts["mode"]) == "append" || strtolower($opts["mode"]) == "overwrite") {
+			$mode = strtolower($opts["mode"]);
+		}
+		
+		// write file
+		if(file_exists($this->filepath) && !is_writable($this->filepath)) { // check file locked
+			$response->message = "File is not writable: [" . $this->filepath . "]";
+			$response->status = false;
+		} else { // attempt to write to file
+			if($mode == "append") {
+				if($lock == true) {
+					file_put_contents($this->filepath,$data,FILE_APPEND);
+				} else {
+					file_put_contents($this->filepath,$data,FILE_APPEND | LOCK_EX);
+				}
+			} else {
+				if($lock == true) {
+					file_put_contents($this->filepath,$data);
+				} else {
+					file_put_contents($this->filepath,$data,LOCK_EX);
+				}
+			}
+			if($success) {
+				$response->message = "Successfully wrote to file: [" . $this->filepath . "]";
+				$response->status = true;			
+			} else {
+				$response->message = "Could not write to file: [" . $this->filepath . "]";
+				$response->status = false;	
+			}
+		}
+			
+		return $response;
+		
+	}
+	
+	/*
+		APPEND TO CURRENTLY OPEN FILE
+		@param $dir = directory to change to
+	*/
+	public function append($data,$opts=array()) {
+		$opts["mode"] = "append"; // overwrite whatever the mode is to append
+		$this->write($data,$opts);
+	}
+
+	/*
+		DELETE CURRENTLY OPEN FILE
+	*/
+	public function delete() {
+		
+	}
+	
 
 	/* 
 		CHANGE DIRECTORY
@@ -70,34 +175,34 @@ class FileConnector {
 	}
 
 	/* 
-		CHANGE DIRECTORY
-		@param $fileStream = fileStream currently being handled
+		UPLOAD FILE
+		@param $filestream = fileStream currently being handled
 	*/
-	public function upload($fileStream,$renameFileTo="") {
+	public function upload($filestream,$rename_file_to="") {
 
 		// set vars
 		$statusOut		= false;
-		$this->fileStream = $fileStream;
+		$this->filestream = $filestream;
 
 		// process file stream
-		if($this->fileStream != "none" or !is_null($this->fileStream)) {
+		if($this->filestream != "none" or !is_null($this->filestream)) {
 
 			// get file extension fpr later use
-			$thisExt = substr($this->fileStream['name'],strrpos($this->fileStream['name'],".")+1);
+			$thisExt = substr($this->filestream['name'],strrpos($this->filestream['name'],".")+1);
 
 			// rename the file if a name is specified
-			if(!is_null($renameFileTo) && $renameFileTo != "") {
+			if(!is_null($rename_file_to) && $rename_file_to != "") {
 				// rename the file to the specified file name, we need to attach the extension
-				$newFilename = $this->directory . "/" . $this->safeFilename($renameFileTo) . "." . $thisExt;
+				$new_filename = $this->directory . "/" . $this->safeFilename($rename_file_to) . "." . $thisExt;
 			} else {
 				// otherwise rename file so that it's alpha-numeric
-				$newFilename = $this->directory . "/" . $this->safeFilename($this->fileStream['name']);
+				$new_filename = $this->directory . "/" . $this->safeFilename($this->filestream['name']);
 			}
 
 			// CHECK TO SEE IF FILE HAS BEEN UPLOADED
-			if(is_uploaded_file($this->fileStream['tmp_name'])) { // Temp Upload Passed
+			if(is_uploaded_file($this->filestream['tmp_name'])) { // Temp Upload Passed
 
-				if($this->fileStream['size'] <= $this->maxSize) { // Size Passed
+				if($this->filestream['size'] <= $this->max_size) { // Size Passed
 					
 					// CHECK IF CORRECT MIME TYPE
 					$typePassed = false;
@@ -105,7 +210,7 @@ class FileConnector {
 						$typePassed = true;
 					} else {
 						for($i=0; $i<count($this->accept); $i++) {
-							if($this->fileStream["type"] == $this->accept[$i]) {
+							if($this->filestream["type"] == $this->accept[$i]) {
 								$typePassed = true;
 							}
 						}
@@ -114,19 +219,19 @@ class FileConnector {
 					// if mime type passed, upload the file
 					if($typePassed) { // Type Passed
 
-						if(move_uploaded_file($this->fileStream['tmp_name'],$newFilename)) { // Move Passed
+						if(move_uploaded_file($this->filestream['tmp_name'],$new_filename)) { // Move Passed
 						
 							// CHMOD FILE
-							@chmod($newFilename, 0755); // Will not work on Windows boxes, so don't make the script rely on this.
+							@chmod($new_filename, 0755); // Will not work on Windows boxes, so don't make the script rely on this.
 							
 							// PLUG THIS FILE'S INFO INTO THE FILE PROCESS LIST
 							$index = intval(count($this->storedFiles));
-							$this->storedFiles[$index]['fullname'] 	= $newFilename;
-							$this->storedFiles[$index]['filename'] 	= substr($newFilename,strrpos($newFilename,"/")+1);
-							$this->storedFiles[$index]['old_name'] 	= $this->fileStream['name'];
-							$this->storedFiles[$index]['tmp_name']	= $this->fileStream['tmp_name'];
-							$this->storedFiles[$index]['size'] 		= $this->fileStream['size'];
-							$this->storedFiles[$index]['type'] 		= $this->fileStream["type"];
+							$this->storedFiles[$index]['fullname'] 	= $new_filename;
+							$this->storedFiles[$index]['filename'] 	= substr($new_filename,strrpos($new_filename,"/")+1);
+							$this->storedFiles[$index]['old_name'] 	= $this->filestream['name'];
+							$this->storedFiles[$index]['tmp_name']	= $this->filestream['tmp_name'];
+							$this->storedFiles[$index]['size'] 		= $this->filestream['size'];
+							$this->storedFiles[$index]['type'] 		= $this->filestream["type"];
 							$this->storedFiles[$index]['ext'] 		= $thisExt;
 
 							// CONFIRM FILE STATUS
@@ -140,8 +245,8 @@ class FileConnector {
 					} else { // Type Failed
 						$this->status = 2;
 						/* 
-						if(is_file($newFilename)) {
-							unlink($newFilename); // delete this file from the system so it doesn't junk it up
+						if(is_file($new_filename)) {
+							unlink($new_filename); // delete this file from the system so it doesn't junk it up
 						} 
 						*/
 					}
@@ -149,8 +254,8 @@ class FileConnector {
 				} else { // Size Failed
 					$this->status = 3;
 					/* 
-					if(is_file($newFilename)) {
-						unlink($newFilename); // delete this file from the system so it doesn't junk it up
+					if(is_file($new_filename)) {
+						unlink($new_filename); // delete this file from the system so it doesn't junk it up
 					} 
 					*/
 				}
@@ -190,10 +295,10 @@ class FileConnector {
 
 		// set up rename variables
 		$oldFileName 	= $this->directory . "/" . $oldFile;
-		$newFileName 	= $this->directory . "/" . $this->safeFilename($newName);
+		$new_filename 	= $this->directory . "/" . $this->safeFilename($newName);
 
 		// rename the file
-		if(rename($oldFileName,$newFileName)) {
+		if(rename($oldFileName,$new_filename)) {
 			$output	= true;
 		} else { // rename failed
 			$this->status = 4;
@@ -225,10 +330,10 @@ class FileConnector {
 		Reformats a filename so that is contains only alpha-numeric characters and _-.
 		@param $filename = name of file to rename
 	*/
-	private function safeFilename($fileName) {
-		$newFileName = str_replace(" ", "-",$fileName);
-		$newFileName = ereg_replace("[^A-Za-z0-9_.-]", "",$newFileName);
-    	return $newFileName;
+	private function safeFilename($filename) {
+		$new_filename = str_replace(" ", "-",$filename);
+		$new_filename = ereg_replace("[^A-Za-z0-9_.-]", "",$new_filename);
+    	return $new_filename;
 	}
 
 }

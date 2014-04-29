@@ -10,35 +10,50 @@
 */
 class KraftwerkLogger extends FileConnector {
 	
-	/*
-		Writes to the log file
-	*/
-	public function write($str,$opts=array()) {
-		$mode = "append"; // default
-		if(strtolower($opts["mode"]) == "append" || strtolower($opts["mode"]) == "overwrite") {
-			$mode = strtolower($opts["mode"]);
+	// VARS
+	public $logpath = NULL;
+
+	// GENERATE LOG FILE IF NOT EXISTS
+	public function generate($logpath) {
+		global $kraftwerk; // generate can only be called after the core has loaded
+		if(!file_exists($kraftwerk->get_log_dir())) {
+			@mkdir($kraftwerk->get_log_dir(), 0777); // make log directory
+		} else {
+			@chmod($kraftwerk->get_log_dir(), 0777); // force writeable
 		}
+		$this->logpath = $logpath; // set log path
+		$this->open($logpath);
 	}
 	
-	/*
-		Alias for write, appends to the log file
-	*/
-	public function append($str) {
-		$opts = array();
-		$opts["mode"] = "append";
-		$this->write($str,$opts);
-	}
-	
-	public function delete() {
-		
-	}
-	
-	public function generate() {
-		
-	}
-	
+	// WRITE ERROR
 	public function log_error($error) {
-		
+		$this->open($this->logpath);
+		$this->append("[" . date("Y-m-d H:i:s T") . " / " . $_SERVER['REMOTE_ADDR'] . "] ERROR: " . "\r\n" . $error . "\r\n");
+		$this->close();
+	}
+	
+	// WRITE WARNING
+	public function log_warning($warning) {
+		$this->open($this->logpath);
+		$this->append("[" . date("Y-m-d H:i:s T") . " / " . $_SERVER['REMOTE_ADDR'] . "] WARNING: ". "\r\n" . $warning . "\r\n");
+		$this->close();
+	}
+	
+	// WRITE GENERIC
+	public function log_info($info) {
+		$this->open($this->logpath);
+		$this->append($info . "\r\n");
+		$this->close();
+	}
+	
+	// WRITE ERROR
+	public function log_render($message) {
+		global $kwconfig;
+		if(!isset($kwconfig->log_renders) || (isset($kwconfig->log_renders) && $kwconfig->log_renders != false)) {
+			$this->open($this->logpath);
+			$this->append("[" . date("Y-m-d H:i:s T") . " / " . $_SERVER['REMOTE_ADDR'] . "] OK: " . "\r\n" . $message . "\r\n");
+			$this->close();
+		}
 	}
 	
 }

@@ -29,7 +29,7 @@ class SendMailConnector {
 		SEND MAIL
 		@returns true/fail depending on whether or no successful
 	*/
-	public function send() {
+	public function send_mail() {
 		
 		// assemble headers
 		$headers = array();
@@ -60,6 +60,13 @@ class SendMailConnector {
 		// attach mailer version
 		$headers[] = "X-Mailer: PHP/".phpversion();
 
-		return mail($this->to,$this->subject,$this->message,implode("\r\n", $headers));
+		// implode headers
+		$send_headers = implode("\r\n", $headers);
+	
+		// try sending mail, and return responses
+		$response = new StdClass();
+		$response->status = mail($this->to,$this->subject,$this->message,$send_headers);
+		$response->headers = $send_headers;
+		return $response;
 	}
 }

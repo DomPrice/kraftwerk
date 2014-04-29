@@ -104,6 +104,9 @@ class KraftwerkController {
 				$error = "Kraftwerk cannot open view file [" . $this->extrapolate_view($view) . "]";	
 				$kraftwerk->logger->log_error($error);
 				$kraftwerk->exception->throw_error($error);	
+			} else {
+				$render_message = "render OK: " . $this->extrapolate_view($view);
+				$kraftwerk->logger->log_render($render_message);
 			}
 			$GLOBALS["$yield"] = ob_get_clean(); // send result to globals
 		} else {

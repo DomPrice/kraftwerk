@@ -14,7 +14,7 @@ class KraftwerkView {
 	public function __construct() {
 	}
 	
-	/* PARSE PARTIAL */
+	/* PARSE PARTIAL 
 	public function parse($path) {
 		
 		$str = ""; //read file
@@ -51,6 +51,6 @@ class KraftwerkView {
     	}
     	return $str;
 	}
-
+*/
 }
 ?>

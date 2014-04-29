@@ -28,7 +28,22 @@ class KraftwerkMailer extends SendMailConnector {
 		renders the email according to the template
 		@param $vars = variables to be passed to the template for parsing
 	*/
-	public function send($vars) {
+	public function send($mailer_vars) {
+		global $kraftwerk;
+		global $kw_config;
+		
+		// SAVE RENDER VARS CONTAINER
+		global $variables;
+		$variables = new stdClass;
+
+		// REGISTER GLOBALS
+		if($mailer_vars != NULL && $mailer_vars != "" && count($mailer_vars) > 0) {
+			foreach($mailer_vars as $key => $value) {
+				if($variables->$key == "" || $variables->$key == NULL) {
+					$variables->$key = $value;
+				}
+			}
+		}
 		
 		// RENDER MAILER TEMPLATE
 		$template_path = realpath($_SERVER['DOCUMENT_ROOT']) . $kw_config->hosted_dir . $kraftwerk->VIEWS_DIR . "/_layouts/_mailers/" . $this->template . ".php";
@@ -49,8 +64,24 @@ class KraftwerkMailer extends SendMailConnector {
 		}
 		
 		// SEND THE MESSAGE
-		return $this->send_mail();
-		
+		try {
+			
+			// try to send
+			$mailer_response = $this->send_mail();
+			
+			// log warning
+			if($mailer_response->status != true) {
+				$warning = "Kraftwerk was unable to send email.\r\nHeaders:\r\n" . $mailer_response->status;	
+				$kraftwerk->logger->log_warning($warning);
+			}
+			
+			return $mailer_response->status;
+			
+		} catch(Exeception $e) {
+			$error = "Kraftwerk was unable to send email. A sendmail error occured: " . $e;	
+			$kraftwerk->logger->log_error($error);
+			$kraftwerk->exception->throw_error($error,$e);	
+		}
 	}
 	
 }

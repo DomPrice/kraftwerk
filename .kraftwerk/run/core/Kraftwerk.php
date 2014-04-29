@@ -22,6 +22,7 @@ class Kraftwerk {
 	var $VIEWS_DIR				= "/application/views";
 	var $COGS_DIR				= "/cogs";
 	var $ASSETS_DIR				= "/assets";
+	var $LOGS_DIR				= "/logs";
 	
 	// OTHER STRUCTS
 	var $CORE_LIB_LOADED 		= array();
@@ -63,6 +64,7 @@ class Kraftwerk {
 		$this->MODELS_DIR			= "/" . $kw_root . "/application/models";
 		$this->VIEWS_DIR			= "/" . $kw_root . "/application/views";
 		$this->COGS_DIR				= "/" . $kw_root . "/cogs";
+		$this->LOGS_DIR				= "/" . $kw_root . "/logs";
 		$this->ASSETS_DIR			= "/" . $kw_root . "/assets";
 	}
 	
@@ -121,6 +123,7 @@ class Kraftwerk {
 	
 	/* INITLIALIZE LOGGER */
 	public function loadLogger() {
+		global $kw_config;
 		$this->logger = new KraftwerkLogger();
 	}
 	
@@ -201,6 +204,21 @@ class Kraftwerk {
 	*/
 	private function controllerToClassName($controller) {
     	return preg_replace('/(?:^|_)([a-z])/e', 'strtoupper($1)', $controller) . "Controller";
+	}
+	
+	/*
+		Returns full log directory path
+	*/
+	public function get_log_dir() {
+		global $kw_config;
+		return realpath($_SERVER['DOCUMENT_ROOT']) . $kw_config->hosted_dir . $this->LOGS_DIR;	
+	}
+	
+	/*
+		Alias for get_log_dir()
+	*/
+	public function getLogDir() {
+		return $this->get_log_dir();
 	}
 	
 }

@@ -36,4 +36,7 @@ if ($kw_config->display_errors == true) {
 include_once(dirname(__FILE__) . '/core/Kraftwerk.php');
 $GLOBALS['kraftwerk'] = new Kraftwerk(); // run kraftwerk
 
+// generate log file
+$GLOBALS['kraftwerk']->logger->generate($GLOBALS['kraftwerk']->get_log_dir() . "/kraftwerk.log");
+
 ?>
