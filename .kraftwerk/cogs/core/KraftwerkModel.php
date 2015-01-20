@@ -357,9 +357,11 @@ class KraftwerkModel extends MySQLConnector {
 		if(is_array($models)) {
 			foreach($models as $i => $m ) {
 				array_push($this->has_many,$m);
+				$this->instance_data[$m] = NULL;
 			}
 		} else if(is_string($models)) {
 			array_push($this->has_many,$models);
+			$this->instance_data[$m] = NULL;
 		}
 	}
 	
