@@ -12,10 +12,15 @@ class KraftwerkModel extends MySQLConnector {
 	
 	// CLASS VARS
 	protected $data = array(); // stored data from singular query result
-	protected $fields= array(); // fields used by this table, will be used for checking
+	protected $fields = array(); // fields used by this table, will be used for checking
+	private $instance_data = array(); // used to store dynamically declared instance variables
 	
 	// If set in a child class that extends KraftwerkModel, Kraftwerk will attempt to write to this table instead.
 	protected $use_table = NULL; 
+	
+	// relationships
+	protected $has_many = array();
+	protected $belongs_to = array();
 	
 	// VALIDATORS
 	public $validators = NULL;
@@ -30,6 +35,30 @@ class KraftwerkModel extends MySQLConnector {
 	public function __construct() { // schema is optional
 		$this->validators = new KraftwerkValidator();
 		parent::__construct($host,$user,$pass,$schema);
+	}
+	
+	/*
+		SET DYNAMICALLY CREATED VARIABLES
+	*/
+	public function __set($name, $value) {
+		if(array_key_exists($name, $this->fields)) { // check to see if it's a field
+			$this->data[$name] = $value;
+		} else {
+			$this->instance_data[$name] = $value;
+		}
+	}
+	
+	/*
+		GET DYNAMICALLY CREATED VARIABLES
+	*/
+	public function __get($name) {
+		if(array_key_exists($name, $this->fields)) { // check to see if it's a field
+			return $this->data[$name];
+		} else if(array_key_exists($name, $this->instance_data)) { // check instance data
+			return $this->instance_data[$name];
+		} else {
+			return NULL;	
+		}
 	}
 	
 	/*
@@ -319,6 +348,35 @@ class KraftwerkModel extends MySQLConnector {
 		}
 		return $this->fields;
 	}
+	
+	/*
+		Pushes array of dependent model names to this model
+		@param $models = Array of models to push, if single string, pushes only that model
+	*/
+	public function has_many($models) {
+		if(is_array($models)) {
+			foreach($models as $i => $m ) {
+				array_push($this->has_many,$m);
+			}
+		} else if(is_string($models)) {
+			array_push($this->has_many,$models);
+		}
+	}
+	
+	/*
+		Pushes array of parent model names to this model
+		@param $models = Array of models to push, if single string, pushes only that model
+	*/
+	public function belongs_to($models) {
+		if(is_array($models)) {
+			foreach($models as $i => $m ) {
+				array_push($this->belongs_to,$m);
+			}
+		} else if(is_string($models)) {
+			array_push($this->belongs_to,$models);
+		}
+	}
+	
 	
 	/*
 		###########################################################
