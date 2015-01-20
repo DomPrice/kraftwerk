@@ -59,11 +59,11 @@ class KraftwerkModel extends MySQLConnector {
 			return $this->data[$name];
 		} else if(in_array($name, $this->has_many)) {
 			$model = $this->extrapolate_model_class($name);
-			if(count($this->data()) > 0) {
+			if(count($this->data) > 0) {
 				$table_singular_name = kw_singularize($this->extrapolate_table());
 				$conditions = array();
-				$conditions[$table_singular_name . "_id"] = $this->data->id;
-				eval("\$child_class = new " . $model . "();");
+				$conditions[$table_singular_name . "_id"] = $this->data["id"];
+				$child_class = new $model(); // create new instance
 				return $child_class->find_all($conditions);
 			}
 		} else if(array_key_exists($name, $this->instance_data)) { // check instance data
@@ -124,14 +124,16 @@ class KraftwerkModel extends MySQLConnector {
 				}
 				$query .= ";";
 				$result = $this->runQuery($query);
-				$this->data = $result[0]; // save result internally
+				
+				// encapsulate data
+				$output = $this->encapsulate($result[0]); // save result in new model of same type
 				
 				// close connection, we'll use another to execute
 				$innerConn->close();
 			}
 		}
 
-		return $result;
+		return $output;
 	}
 	
 	/*
@@ -160,14 +162,16 @@ class KraftwerkModel extends MySQLConnector {
 				}
 				$query .= ";";
 				$result = $this->runQuery($query);
-				$this->data = $result[0]; // save result internally
+				
+				// encapsulate data
+				$output = $this->encapsulate($result[0]); // save result in new model of same type
 				
 				// close connection, we'll use another to execute
 				$innerConn->close();
 			}
 		}
 		
-		return $result;
+		return $output;
 	}
 	
 	/*
@@ -230,9 +234,13 @@ class KraftwerkModel extends MySQLConnector {
 			}
 				
 			$result = $this->runQuery($query . ";");
+			
+			// encapsulate data
+			$output = $this->encapsulate($result); // save result in new model of same type
+				
 		}
 
-		return $result;
+		return $output;
 	}
 	
 	/*
@@ -289,13 +297,16 @@ class KraftwerkModel extends MySQLConnector {
 				
 			//return $query;
 			$result = $this->runQuery($query);
+			
+			// encapsulate data
+			$output = $this->encapsulate($result); // save result in new model of same type
 
 		} else { 
 			die($datatypes_valid["error"]);
 		}
 		
 		// return result
-		return $result;
+		return $output;
 	}
 	
 	/*
@@ -493,6 +504,35 @@ class KraftwerkModel extends MySQLConnector {
 			$model_class .= ucfirst(trim($word));
 		}
 		return $model_class;
+	}
+	
+	/*
+		ENCAPSULATES THE QUERY RESULT IN A NEW CLASS INSTANCE 
+		@param $result = Query result to populate new class with
+		@returns $Array returns class or array of classes
+	*/
+	private function encapsulate($result) {
+		$model_class_name = get_class($this);
+		if(is_object($result)) {
+			$model_instance = new $model_class_name(); // get classname
+			foreach($result as $field_name => $field_value) {
+				$model_instance->$field_name = $field_value;
+			}
+			return $model_instance;
+		} else if(is_array($result)) {
+			$results = $result; unset($result); // move to results and unset
+			$model_instances_array = array();
+			foreach($results as $result) {
+				if(is_object($result)) { // must be an object
+					$model_instance = new $model_class_name(); // get classname
+					foreach($result as $field_name => $field_value) {
+						$model_instance->$field_name = $field_value;
+					}
+					array_push($model_instances_array,$model_instance);
+				}
+			}
+			return $model_instances_array;
+		}
 	}
 	
 	/* 
