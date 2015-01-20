@@ -14,12 +14,6 @@
 ##############################################################################
 */
 class MySQLConnector {
-	
-	// CONTROL VARIABLES FOR THIS CONNECTOR
-	protected $DB_HOST	 = "";
-	protected $DB_USERNAME = "";
-	protected $DB_PASSWORD = "";
-	protected $DB_SCHEMA	 = "";
 
 	// ERROR CODE HANDLING
 	protected $status 		= 0;
@@ -35,20 +29,7 @@ class MySQLConnector {
 		@param $pass = database password for login
 		@param $schema = (optional) default scheme for database.
 	*/
-	public function __construct($host='',$user='',$pass='',$schema='') { // schema is optional
-	
-		global $kw_config;
-
-		// SET LOGIN STATUS
-		$this->DB_HOST	 	= $host;
-		$this->DB_USERNAME 	= $user;
-		$this->DB_PASSWORD 	= $pass;
-		$this->DB_SCHEMA 	= $schema;
-		
-		if($this->DB_HOST == "") 		{ $this->DB_HOST = $kw_config->site_database_server; }
-		if($this->DB_USERNAME == "") 	{ $this->DB_USERNAME = $kw_config->site_database_username; }
-		if($this->DB_PASSWORD == "") 	{ $this->DB_PASSWORD = $kw_config->site_database_password; }
-		if($this->DB_SCHEMA == "") 		{ $this->DB_SCHEMA = $kw_config->site_database_schema; }
+	public function __construct() { // schema is optional
 
 		// SET ERROR CODES
 		$this->statusCodes[0] = "No Errors, Database Connector is Idle";
@@ -67,16 +48,19 @@ class MySQLConnector {
 	*/
 	public function runQuery($query) {
 		
+		// globals
+		global $kw_config;
+		
 		// clear status
 		$this->status = 0;
 
 		// create connection
-		$innerConn = new mysqli($this->DB_HOST, $this->DB_USERNAME, $this->DB_PASSWORD);
+		$innerConn = new mysqli($kw_config->site_database_server, $kw_config->site_database_username, $kw_config->site_database_password);
 		
 		// check connection
 		if(!mysqli_connect_errno()) {
 
-			$innerConn->select_db($this->DB_SCHEMA); // select database
+			$innerConn->select_db($kw_config->site_database_schema); // select database
 			$queryResult = $innerConn->query($query);
 
 			if($queryResult) { // run query

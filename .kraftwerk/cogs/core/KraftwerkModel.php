@@ -27,6 +27,9 @@ class KraftwerkModel extends MySQLConnector {
 	
 	// ERROR MESSAGES
 	public $field_errors = array();
+	
+	// RELATIONSHIP CALLED
+	private $relationship_called = NULL;
 
 	
 	/*
@@ -54,6 +57,15 @@ class KraftwerkModel extends MySQLConnector {
 	public function __get($name) {
 		if(array_key_exists($name, $this->fields)) { // check to see if it's a field
 			return $this->data[$name];
+		} else if(in_array($name, $this->has_many)) {
+			$model = $this->extrapolate_model_class($name);
+			if(count($this->data()) > 0) {
+				$table_singular_name = kw_singularize($this->extrapolate_table());
+				$conditions = array();
+				$conditions[$table_singular_name . "_id"] = $this->data->id;
+				eval("\$child_class = new " . $model . "();");
+				return $child_class->find_all($conditions);
+			}
 		} else if(array_key_exists($name, $this->instance_data)) { // check instance data
 			return $this->instance_data[$name];
 		} else {
@@ -91,6 +103,9 @@ class KraftwerkModel extends MySQLConnector {
 	*/
 	public function find($id, $conditions = array()) {
 		
+		// globals
+		global $kw_config;
+		
 		// SET TABLE
 		$table = $this->get_table(); // get table
 		$result = NULL;
@@ -99,7 +114,7 @@ class KraftwerkModel extends MySQLConnector {
 		if($id != NULL && $id != "" && $id != 0) {
 
 			// needed for mysql_real_escape_string
-			$innerConn = new mysqli($this->DB_HOST, $this->DB_USERNAME, $this->DB_PASSWORD);
+			$innerConn = new mysqli($kw_config->site_database_server, $kw_config->site_database_username, $kw_config->site_database_password);
 			
 			// make sure connection valid
 			if(!mysqli_connect_errno()) {
@@ -115,7 +130,7 @@ class KraftwerkModel extends MySQLConnector {
 				$innerConn->close();
 			}
 		}
-		
+
 		return $result;
 	}
 	
@@ -123,6 +138,9 @@ class KraftwerkModel extends MySQLConnector {
 		SEARCH FUNCTIONS, FIND BY CONDTIONS
 	*/
 	public function find_by($conditions = array()) {
+		
+		// globals
+		global $kw_config;
 		
 		// SET TABLE
 		$table = $this->get_table(); // get table
@@ -132,7 +150,7 @@ class KraftwerkModel extends MySQLConnector {
 		if($conditions != NULL && $conditions != "") {
 
 			// needed for mysql_real_escape_string
-			$innerConn = new mysqli($this->DB_HOST, $this->DB_USERNAME, $this->DB_PASSWORD);
+			$innerConn = new mysqli($kw_config->site_database_server, $kw_config->site_database_username, $kw_config->site_database_password);
 			
 			// make sure connection valid
 			if(!mysqli_connect_errno()) {
@@ -160,6 +178,9 @@ class KraftwerkModel extends MySQLConnector {
 	*/
 	public function find_all($conditions = array(),$filters = array()) {
 		
+		// globals
+		global $kw_config;
+		
 		// SET TABLE
 		$table = $this->get_table(); // get table
 		$result = NULL;
@@ -167,7 +188,7 @@ class KraftwerkModel extends MySQLConnector {
 		if($table != NULL && $table != "") {
 			
 			// needed for mysql_real_escape_string
-			$innerConn = new mysqli($this->DB_HOST, $this->DB_USERNAME, $this->DB_PASSWORD);
+			$innerConn = new mysqli($kw_config->site_database_server, $kw_config->site_database_username, $kw_config->site_database_password);
 			
 			// make sure connection valid
 			if(!mysqli_connect_errno()) {
@@ -227,6 +248,9 @@ class KraftwerkModel extends MySQLConnector {
 		@returns whether or not entry successfully saved
 	*/
 	public function save($data = array()) {
+
+		// globals
+		global $kw_config;
 		
 		// SET TABLE
 		$table = $this->get_table(); // get table
@@ -244,7 +268,7 @@ class KraftwerkModel extends MySQLConnector {
 		if($datatypes_valid["status"] == true) {	
 		
 			// needed for mysql_real_escape_string
-			$innerConn = new mysqli($this->DB_HOST, $this->DB_USERNAME, $this->DB_PASSWORD);
+			$innerConn = new mysqli($kw_config->site_database_server, $kw_config->site_database_username, $kw_config->site_database_password);
 			
 			// make sure connection valid
 			if(!mysqli_connect_errno()) {
@@ -282,14 +306,17 @@ class KraftwerkModel extends MySQLConnector {
 		@returns whether or not entry successfully deleted
 	*/
 	public function delete($id,$conditions = array()) {
-		
+				
+		// globals
+		global $kw_config;
+				
 		// SET TABLE
 		$table = $this->get_table();
 		
 		if(is_numeric($id) && $id != "" && $id != NULL) { 
 		
 			// needed for mysql_real_escape_string
-			$innerConn = new mysqli($this->DB_HOST, $this->DB_USERNAME, $this->DB_PASSWORD);
+			$innerConn = new mysqli($kw_config->site_database_server, $kw_config->site_database_username, $kw_config->site_database_password);
 			
 			// delete record
 			if(!mysqli_connect_errno()) {
@@ -360,7 +387,8 @@ class KraftwerkModel extends MySQLConnector {
 				$this->instance_data[$m] = NULL;
 			}
 		} else if(is_string($models)) {
-			array_push($this->has_many,$models);
+			$m = $models; // push single model
+			array_push($this->has_many,$m);
 			$this->instance_data[$m] = NULL;
 		}
 	}
@@ -375,7 +403,8 @@ class KraftwerkModel extends MySQLConnector {
 				array_push($this->belongs_to,$m);
 			}
 		} else if(is_string($models)) {
-			array_push($this->belongs_to,$models);
+			$m = $models; // push single model
+			array_push($this->belongs_to,$m);
 		}
 	}
 	
@@ -448,6 +477,22 @@ class KraftwerkModel extends MySQLConnector {
 		
 		// return name
 		return strtolower($table);
+	}
+	
+	/* 
+		RETURN THE EXTRAPOLATED MODEL CLASS NAME THAT KRAFTWERK WILL ATTEMPT TO ACCESS
+		returns the extrapolated model class name
+		@param $name = Name of database table or underscore variable to convert
+		@returns $String returns the extrapolated model class name
+	*/
+	private function extrapolate_model_class($name) {
+		$name = kw_singularize($name);
+		$words = explode("_", strtolower($name));
+		$model_class = "";
+		foreach ($words as $word) {
+			$model_class .= ucfirst(trim($word));
+		}
+		return $model_class;
 	}
 	
 	/* 

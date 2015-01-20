@@ -48,7 +48,7 @@ class KraftwerkLogger extends FileConnector {
 	
 	// WRITE ERROR
 	public function log_render($message) {
-		global $kwconfig;
+		global $kw_config;
 		if(!isset($kwconfig->log_renders) || (isset($kwconfig->log_renders) && $kwconfig->log_renders != false)) {
 			$this->open($this->logpath);
 			$this->append("[" . date("Y-m-d H:i:s T") . " / " . $_SERVER['REMOTE_ADDR'] . "] OK: " . "\r\n" . $message . "\r\n");
