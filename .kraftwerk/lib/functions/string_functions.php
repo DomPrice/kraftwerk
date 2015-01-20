@@ -79,58 +79,61 @@ function kw_validate_format($strIn,$format) {
 	return $output;
 }
 
-function kw_pluralize($string) {
+/*
+	NOTE: kw_pluralize is modified from code by Bermi Ferrer Martinez 
+*/
+function kw_pluralize($word){
 	$plural = array(
-		array( '/(quiz)$/i', "$1zes"),
-		array( '/^(ox)$/i', "$1en"),
-		array( '/([m|l])ouse$/i', "$1ice"),
-		array( '/(matr|vert|ind)ix|ex$/i', "$1ices"),
-		array( '/(x|ch|ss|sh)$/i', "$1es"),
-		array( '/([^aeiouy]|qu)y$/i', "$1ies"),
-		array( '/([^aeiouy]|qu)ies$/i', "$1y"),
-		array( '/(hive)$/i', "$1s"),
-		array( '/(?:([^f])fe|([lr])f)$/i', "$1$2ves"),
-		array( '/sis$/i', "ses"),
-		array( '/([ti])um$/i', "$1a"),
-		array( '/(buffal|tomat)o$/i', "$1oes"),
-		array( '/(bu)s$/i',		"$1ses"),
-		array( '/(alias|status)$/i', "$1es"),
-		array( '/(octop|vir)us$/i',	"$1i"),
-		array( '/(ax|test)is$/i', "$1es"),
-		array( '/s$/i', "s"),
-		array( '/$/', "s")
-	);
+		'/(quiz)$/i'               => '\1zes',
+		'/^(ox)$/i'                => '\1en',
+		'/([m|l])ouse$/i'		   => '\1ice',
+		'/(matr|vert|ind)ix|ex$/i' => '\1ices',
+		'/(x|ch|ss|sh)$/i'		   => '\1es',
+		'/([^aeiouy]|qu)ies$/i'	   => '\1y',
+		'/([^aeiouy]|qu)y$/i'	   => '\1ies',
+		'/(hive)$/i'			   => '\1s',
+		'/(?:([^f])fe|([lr])f)$/i' => '\1\2ves',
+		'/sis$/i'				   => 'ses',
+		'/([ti])um$/i'			   => '\1a',
+		'/(buffal|tomat)o$/i'	   => '\1oes',
+		'/(bu)s$/i'				   => '\1ses',
+		'/(alias|status)/i'		   => '\1es',
+		'/(octop|vir)us$/i'		   => '\1i',
+		'/(ax|test)is$/i'		   => '\1es',
+		'/s$/i'					   => 's',
+		'/$/'					   => 's');
+
+	$uncountable = array('equipment', 'information', 'rice', 'money', 'species', 'series', 'fish', 'sheep');
+
 	$irregular = array(
-		array( 'move',   'moves'    ),
-		array( 'sex',    'sexes'    ),
-		array( 'child',  'children' ),
-		array( 'man',    'men'      ),
-		array( 'person', 'people'   )
-	);
-	
-	$uncountable = array('sheep','fish','series','species',
-		'money','rice','information','equipment');
-						
-	// save some time in the case that singular and plural are the same
-	if(in_array( strtolower( $string ), $uncountable )) {
-		return $string;
+		'person' => 'people',
+		'man'	=> 'men',
+		'child'  => 'children',
+		'sex'	=> 'sexes',
+		'move'   => 'moves');
+
+	$lowercased_word = strtolower($word);
+
+	foreach($uncountable as $_uncountable){
+		if(substr($lowercased_word, (-1 * strlen($_uncountable))) == $_uncountable){
+			return $word;
+		}
 	}
-	
-	// check for irregular singular forms
-	foreach($irregular as $noun) {
-		if(strtolower( $string ) == $noun[0]) {
-			return $noun[1];
+
+	foreach($irregular as $_plural => $_singular){
+		if(preg_match('/(' . $_plural . ')$/i', $word, $arr)){
+			return preg_replace('/(' . $_plural . ')$/i', substr($arr[0], 0, 1) . substr($_singular, 1), $word);
+		}
+	}
+
+	foreach($plural as $rule => $replacement){
+		if(preg_match($rule, $word)){
+			return preg_replace($rule, $replacement, $word);
 		}
 	}
 	
-	// check for matches using regular expressions
-	foreach($plural as $pattern) {
-		if(preg_match( $pattern[0], $string)) {
-			return preg_replace( $pattern[0], $pattern[1], $string );
-		}
-		return $string;
-    }
-}
+	return false;
+} 
 
 function kw_singularize($params) {
 	

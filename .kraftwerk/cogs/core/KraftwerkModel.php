@@ -12,14 +12,15 @@ class KraftwerkModel extends MySQLConnector {
 	
 	// CLASS VARS
 	protected $data = array(); // stored data from singular query result
-	protected $fields = array(); // fields used by this table, will be used for checking
+	protected $fields = array(); // field information used by this table, will be used for validation
 	private $instance_data = array(); // used to store dynamically declared instance variables
 	
 	// If set in a child class that extends KraftwerkModel, Kraftwerk will attempt to write to this table instead.
 	protected $use_table = NULL; 
 	
-	// relationships
+	// RELATIONSHIPS
 	protected $has_many = array();
+	protected $has_one = array();
 	protected $belongs_to = array();
 	
 	// VALIDATORS
@@ -27,21 +28,27 @@ class KraftwerkModel extends MySQLConnector {
 	
 	// ERROR MESSAGES
 	public $field_errors = array();
-	
-	// RELATIONSHIP CALLED
-	private $relationship_called = NULL;
 
-	
+
+	/*
+		###########################################################
+			   CONSTRUCTOR FUNCTIONS AND MAGIC FUNCTIONS
+		###########################################################
+	*/
+
 	/*
 		CONSTRUCTOR
 	*/
 	public function __construct() { // schema is optional
 		$this->validators = new KraftwerkValidator();
-		parent::__construct($host,$user,$pass,$schema);
+		parent::__construct();
 	}
 	
 	/*
 		SET DYNAMICALLY CREATED VARIABLES
+		This will set variables for this model instance as $model->variable, and
+		store them in the appropriate data array depending on what the name of the
+		field is.
 	*/
 	public function __set($name, $value) {
 		if(array_key_exists($name, $this->fields)) { // check to see if it's a field
@@ -53,18 +60,35 @@ class KraftwerkModel extends MySQLConnector {
 	
 	/*
 		GET DYNAMICALLY CREATED VARIABLES
+		This will get variables for this model instance as $model->variable, and
+		retrieve them from the appropriate data array depending on what the name of the
+		field is.
 	*/
 	public function __get($name) {
+
 		if(array_key_exists($name, $this->fields)) { // check to see if it's a field
 			return $this->data[$name];
-		} else if(in_array($name, $this->has_many)) {
+		} else if(in_array($name, $this->has_many) || in_array($name, $this->has_one) || in_array($name, $this->belongs_to)) {
 			$model = $this->extrapolate_model_class($name);
 			if(count($this->data) > 0) {
-				$table_singular_name = kw_singularize($this->extrapolate_table());
+				
 				$conditions = array();
-				$conditions[$table_singular_name . "_id"] = $this->data["id"];
-				$child_class = new $model(); // create new instance
-				return $child_class->find_all($conditions);
+				$new_class = new $model(); // create new instance
+
+				// determine whether to send children or parent model
+				if(in_array($name, $this->has_many)) {
+					$table_singular_name = kw_singularize($this->extrapolate_table());
+					$conditions[$table_singular_name . "_id"] = $this->data["id"];
+					return $new_class->find_all($conditions);
+				} else if(in_array($name, $this->has_one)) {
+					$table_singular_name = kw_singularize($this->extrapolate_table());
+					$conditions[$table_singular_name . "_id"] = $this->data["id"];
+					return $new_class->find_by($conditions);
+				} else if(in_array($name, $this->belongs_to)) {
+					$parent_singular_name = kw_singularize($name);
+					$conditions["id"] = $this->data[$parent_singular_name . "_id"];
+					return $new_class->find_by($conditions);
+				}
 			}
 		} else if(array_key_exists($name, $this->instance_data)) { // check instance data
 			return $this->instance_data[$name];
@@ -72,6 +96,12 @@ class KraftwerkModel extends MySQLConnector {
 			return NULL;	
 		}
 	}
+	
+	/*
+		###########################################################
+							UPDATE FUNCTIONS
+		###########################################################
+	*/
 	
 	/*
 		RETURNS THE DATA SET FOR THIS OBJECT
@@ -84,11 +114,9 @@ class KraftwerkModel extends MySQLConnector {
 		UPDATE THE DATA FIELDS IN THE OBJECT TO SPECIFIED HASH
 	*/
 	public function update($update_hash=array()) {
-		$new_data = new stdClass();
 		foreach ($update_hash as $key => $value) {
-    		$new_data->$key = $value;
+    		$this->data[$key] = $value;
 		}
-		$this->data = $new_data;
 	}
 	
 	/*
@@ -98,41 +126,19 @@ class KraftwerkModel extends MySQLConnector {
 		$this->update($update_hash);
 	}
 	
+	
 	/*
-		SEARCH FUNCTIONS
+		###########################################################
+							SEARCH FUNCTIONS
+		###########################################################
+	*/
+	
+	/*
+		SEARCH FUNCTIONS, FIND
 	*/
 	public function find($id, $conditions = array()) {
-		
-		// globals
-		global $kw_config;
-		
-		// SET TABLE
-		$table = $this->get_table(); // get table
-		$result = NULL;
-		
-		// construct query
-		if($id != NULL && $id != "" && $id != 0) {
-
-			// needed for mysql_real_escape_string
-			$innerConn = new mysqli($kw_config->site_database_server, $kw_config->site_database_username, $kw_config->site_database_password);
-			
-			// make sure connection valid
-			if(!mysqli_connect_errno()) {
-				$query = "SELECT * FROM " . $table . " WHERE id=" . intval($id); 
-				if((count($conditions) > 0) && $this->validate_data_types($conditions,$innerConn)) {
-					$query .= " AND" . $this->generate_params_clause($conditions,$innerConn);
-				}
-				$query .= ";";
-				$result = $this->runQuery($query);
-				
-				// encapsulate data
-				$output = $this->encapsulate($result[0]); // save result in new model of same type
-				
-				// close connection, we'll use another to execute
-				$innerConn->close();
-			}
-		}
-
+		$conditions["id"] = $id;
+		$output = $this->find_by($conditions);
 		return $output;
 	}
 	
@@ -149,7 +155,7 @@ class KraftwerkModel extends MySQLConnector {
 		$result = NULL;
 		
 		// construct query
-		if($conditions != NULL && $conditions != "") {
+		if($conditions != NULL && $conditions != "" && $table != NULL && $table != "") {
 
 			// needed for mysql_real_escape_string
 			$innerConn = new mysqli($kw_config->site_database_server, $kw_config->site_database_username, $kw_config->site_database_password);
@@ -164,7 +170,11 @@ class KraftwerkModel extends MySQLConnector {
 				$result = $this->runQuery($query);
 				
 				// encapsulate data
-				$output = $this->encapsulate($result[0]); // save result in new model of same type
+				if(count($result) > 0) {
+					$output =  $this->encapsulate($result[0]); // save result in new model of same type
+				} else {
+					$output = array(); // empty set
+				}
 				
 				// close connection, we'll use another to execute
 				$innerConn->close();
@@ -173,10 +183,10 @@ class KraftwerkModel extends MySQLConnector {
 		
 		return $output;
 	}
-	
+
 	/*
 		FIND ALL
-		Returns all pets that meet the criteria specified in $opts
+		Returns all that meet the criteria specified in $opts
 		@param $conditions parameters of query
 		@param $filters MIN/MAX/ORDER_BY/DESC
 	*/
@@ -234,13 +244,37 @@ class KraftwerkModel extends MySQLConnector {
 			}
 				
 			$result = $this->runQuery($query . ";");
-			
-			// encapsulate data
-			$output = $this->encapsulate($result); // save result in new model of same type
-				
+			if(count($result) > 0) {
+				$output = $this->encapsulate($result); // save result in new model of same type
+			} else {
+				$output = array(); // empty set
+			}
+
 		}
 
 		return $output;
+	}
+	
+	/*
+		ALL
+		Alias for find_all()
+		@param $conditions parameters of query
+		@param $filters MIN/MAX/ORDER_BY/DESC
+	*/
+	public function all($condtions=array(),$filters = array()) {
+		return $this->find_all($condtions,$filters);
+	}
+	
+	/*
+		FIRST
+		Returns the first match
+		@param $conditions parameters of query
+		@param $filters MIN/MAX/ORDER_BY/DESC
+	*/
+	public function first($condtions=array(),$filters = array()) {
+		$filters["min"] = 0;
+		$filters["max"] = 1;
+		return $this->find_all($condtions,$filters);
 	}
 	
 	/*
@@ -387,6 +421,13 @@ class KraftwerkModel extends MySQLConnector {
 		return $this->fields;
 	}
 	
+	
+	/*
+		###########################################################
+					      RELATIONSHIP FUNCTIONS
+		###########################################################
+	*/
+	
 	/*
 		Pushes array of dependent model names to this model
 		@param $models = Array of models to push, if single string, pushes only that model
@@ -395,12 +436,19 @@ class KraftwerkModel extends MySQLConnector {
 		if(is_array($models)) {
 			foreach($models as $i => $m ) {
 				array_push($this->has_many,$m);
-				$this->instance_data[$m] = NULL;
 			}
 		} else if(is_string($models)) {
-			$m = $models; // push single model
-			array_push($this->has_many,$m);
-			$this->instance_data[$m] = NULL;
+			array_push($this->has_many,$models); // push single model
+		}
+	}
+	
+	/*
+		Pushes of one dependent model names to this model
+		@param $models = Array of models to push, if single string, pushes only that model
+	*/
+	public function has_one($model) {
+		if(is_string($model)) {
+			array_push($this->has_one,$model);
 		}
 	}
 	
@@ -429,18 +477,22 @@ class KraftwerkModel extends MySQLConnector {
 	private function validate_data_types($conditions) {
 		$output = array();
 		$output["status"] = true;
-		foreach($conditions as $field => $value) {
-			if($this->is_field_type_datetime($field) && !$this->is_valid_mysql_datetime($value)) {
-				$output["status"] = false;
-				$output["error"] = "Type mismatch: The value of `" . $field . "` is not a correctly formatted MySQL datetime value: " . $value;
-			} elseif($this->is_field_type_date($field) && !$this->is_valid_mysql_date($value)) {
-				$output["status"] = false;	
-				$output["error"] = "Type mismatch: The value of `" . $field . "` is not a correctly formatted MySQL date value: " . $value;
-			} elseif($this->is_field_type_number($field) && !is_numeric($value)) {
-				$output["status"] = false;	
-				$output["error"] = "Type mismatch: The value of `" . $field . "` is not a correctly formatted numeric value: " . $value;
+		if($conditions != NULL && $conditions != "" && $conditions != array()) {
+			foreach($conditions as $field => $value) {
+				if($this->is_field_type_datetime($field) && !$this->is_valid_mysql_datetime($value)) {
+					$output["status"] = false;
+					$output["error"] = "Type mismatch: The value of `" . $field . "` is not a correctly formatted MySQL datetime value: " . $value;
+				} elseif($this->is_field_type_date($field) && !$this->is_valid_mysql_date($value)) {
+					$output["status"] = false;	
+					$output["error"] = "Type mismatch: The value of `" . $field . "` is not a correctly formatted MySQL date value: " . $value;
+				} elseif($this->is_field_type_number($field) && !is_numeric($value)) {
+					$output["status"] = false;	
+					$output["error"] = "Type mismatch: The value of `" . $field . "` is not a correctly formatted numeric value: " . $value;
+				}
+				// assume it is a string if none of these are false
 			}
-			// assume it is a string if none of these are false
+		} else {
+			$output["status"] = false;	
 		}
 		return $output;
 	}
@@ -477,17 +529,11 @@ class KraftwerkModel extends MySQLConnector {
 		$name = $output; // save as name
 		
 		// set plurality
-		if(substr($name, -2) == "sh" || substr($name, -2) == "ch" || substr($name, -1) == "s") {
-			$name .= "es";
-		} elseif(substr($name, -1) == "y") {
-			$name = substr($name, 0, -1) . "ies";
-		} else {
-			$name .= "s";
-		}
-		$table = preg_replace("/[^a-zA-Z0-9\s]/", "_", $name);
+		$name = kw_pluralize($name);
+		$table = strtolower(preg_replace("/[^a-zA-Z0-9\s]/", "_", $name));
 		
 		// return name
-		return strtolower($table);
+		return $table;
 	}
 	
 	/* 
