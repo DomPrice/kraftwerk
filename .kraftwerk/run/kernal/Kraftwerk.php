@@ -15,25 +15,30 @@ class Kraftwerk {
 	
 	// COMPOMENT DIRECTORIES
 	// These will be appended to by the core if the hosting directory is different than "/" as set in config/config.php
-	var $LIB_DIR				= "/lib";
+	
 	var $CONFIG_GLOBAL_DIR		= "/config";
 	var $CONTROLLERS_DIR		= "/application/controllers";
 	var $MODELS_DIR				= "/application/models";
 	var $VIEWS_DIR				= "/application/views";
+	var $APP_LIBS_DIR			= "/application/libraries";
 	var $COGS_DIR				= "/cogs";
+	var $LIBS_DIR				= "/run/lib";
+	var $RUN_DIR 				= "/run";
 	var $ASSETS_DIR				= "/assets";
 	var $LOGS_DIR				= "/logs";
 	
 	// OTHER STRUCTS
-	var $CORE_LIB_LOADED 		= array();
-	var $CONFIG_LOADED 			= array();
-	var $COGS_LOADED 			= array();
-	var $MODELS_LOADED 			= array();
-	var $CONTROLLERS_LOADED 	= array();
-	var $CURRENT_CONTROLLER     = NULL;
-	var $CURRENT_ACTION		    = NULL;
+	var $CORE_LIB_LOADED 			= array();
+	var $CONFIG_LOADED 				= array();
+	var $COGS_LOADED 				= array();
+	var $MODELS_LOADED 				= array();
+	var $CONTROLLERS_LOADED 		= array();
+	var $KERNAL_COMPONENTS_LOADED 	= array();
+	var $CURRENT_CONTROLLER     	= NULL;
+	var $CURRENT_ACTION		   		= NULL;
 	
-	var $CONFIG 				= "";
+	// CONFIG VAR
+	var $CONFIG = "";
 	
 	// PUBLIC VARIABLES AND OBJECTS
 	public $logger				= "";
@@ -52,20 +57,24 @@ class Kraftwerk {
 		CONFIGURE PATH NAMES
 	*/
 	public function pathNames() {
-		global $kw_config;
+		global $kw_config; 
 		if(isset($kw_config->kw_root) && ($kw_config->kw_root != "")) {
-			$kw_root = $kw_config->kw_root	;
+			$kw_root = $kw_config->kw_root;
 		} else {
-			$kw_root = ".kraftwerk"; // default to . syntax
+			$kw_root = "/.kraftwerk"; // default to . syntax
 		}
-		$this->LIB_DIR				= "/" . $kw_root . "/lib";
-		$this->CONFIG_GLOBAL_DIR	= "/" . $kw_root . "/config";
-		$this->CONTROLLERS_DIR		= "/" . $kw_root . "/application/controllers";
-		$this->MODELS_DIR			= "/" . $kw_root . "/application/models";
-		$this->VIEWS_DIR			= "/" . $kw_root . "/application/views";
-		$this->COGS_DIR				= "/" . $kw_root . "/cogs";
-		$this->LOGS_DIR				= "/" . $kw_root . "/logs";
-		$this->ASSETS_DIR			= "/" . $kw_root . "/assets";
+
+		$this->CONFIG_GLOBAL_DIR	= $kw_root . $this->CONFIG_GLOBAL_DIR;
+		$this->CONTROLLERS_DIR		= $kw_root . $this->CONTROLLERS_DIR;
+		$this->MODELS_DIR			= $kw_root . $this->MODELS_DIR;
+		$this->VIEWS_DIR			= $kw_root . $this->VIEWS_DIR;
+		$this->APP_LIBS_DIR			= $kw_root . $this->APP_LIBS_DIR;
+		$this->COGS_DIR				= $kw_root . $this->COGS_DIR;
+		$this->LOGS_DIR				= $kw_root . $this->LOGS_DIR;
+		$this->RUN_DIR				= $kw_root . $this->RUN_DIR;
+		$this->LIBS_DIR				= $kw_root . $this->LIBS_DIR;
+		$this->ASSETS_DIR			= $kw_root . $this->ASSETS_DIR;
+		
 	}
 	
 	/* 
@@ -77,18 +86,22 @@ class Kraftwerk {
 		global $kw_config;
 		
 		// load libs
-		$this->loadComponentDirectory(realpath($_SERVER['DOCUMENT_ROOT']) . $kw_config->hosted_dir . $this->LIB_DIR);
+		$this->loadComponentDirectory(realpath($_SERVER['DOCUMENT_ROOT']) . $kw_config->hosted_dir . $this->LIBS_DIR);
 		
 		// load cogs/dependencies
-		$this->loadComponentDirectory(realpath($_SERVER['DOCUMENT_ROOT']) . $kw_config->hosted_dir . $this->COGS_DIR . "/connectors");
-		$this->loadComponentDirectory(realpath($_SERVER['DOCUMENT_ROOT']) . $kw_config->hosted_dir . $this->COGS_DIR . "/core");
-		$this->loadComponentDirectory(realpath($_SERVER['DOCUMENT_ROOT']) . $kw_config->hosted_dir . $this->COGS_DIR . "/custom");
-		$this->loadComponentDirectory(realpath($_SERVER['DOCUMENT_ROOT']) . $kw_config->hosted_dir . $this->COGS_DIR . "/extensions");
-		$this->loadComponentDirectory(realpath($_SERVER['DOCUMENT_ROOT']) . $kw_config->hosted_dir . $this->COGS_DIR . "/utility");
+		$this->loadComponentDirectory(realpath($_SERVER['DOCUMENT_ROOT']) . $kw_config->hosted_dir . $this->RUN_DIR . "/core/connectors");
+		$this->loadComponentDirectory(realpath($_SERVER['DOCUMENT_ROOT']) . $kw_config->hosted_dir . $this->RUN_DIR . "/core/components");
+		$this->loadComponentDirectory(realpath($_SERVER['DOCUMENT_ROOT']) . $kw_config->hosted_dir . $this->RUN_DIR . "/core/utility");
+		
+		// load cogs (extensions)
+		$this->loadComponentDirectory(realpath($_SERVER['DOCUMENT_ROOT']) . $kw_config->hosted_dir . $this->COGS_DIR);
 		
 		// load the models
 		$this->loadComponentDirectory(realpath($_SERVER['DOCUMENT_ROOT']) . $kw_config->hosted_dir . $this->MODELS_DIR);
 		
+		// load app specific libraries
+		$this->loadComponentDirectory(realpath($_SERVER['DOCUMENT_ROOT']) . $kw_config->hosted_dir . $this->APP_LIBS_DIR);
+
 	}
 	
 	/* LOAD CLASSES */

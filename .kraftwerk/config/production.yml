@@ -1,0 +1,25 @@
+---
+# DATABASE CONFIG
+site_database_server:    p50mysql481.secureserver.net
+site_database_username:  kraftwerktest
+site_database_password:  aPvxmMPLE8!
+site_database_schema:    kraftwerktest
+	
+# CORE CONFIG
+hosted_dir: /hosted/armasta.com/www
+kw_root:
+default_language: en-us
+
+#IMAGE SETTINGS
+image_save_dir:              /files
+image_display_path:	         /images
+image_max_size:              2097152 # 2 Megabytes
+image_accept_files:          image/jpeg, image/jpg
+image_default_jpeg_quality:  99; // in pixels
+image_max_width:             500 # in pixels
+image_max_height:            500; # in pixels
+	
+# ERROR HANDLING
+display_errors:	true;
+
+

@@ -19,9 +19,7 @@ class KraftwerkModel extends MySQLConnector {
 	protected $use_table = NULL; 
 	
 	// RELATIONSHIPS
-	protected $has_many = array();
-	protected $has_one = array();
-	protected $belongs_to = array();
+	protected $relationships = array();
 	
 	// VALIDATORS
 	public $validators = NULL;
@@ -68,7 +66,11 @@ class KraftwerkModel extends MySQLConnector {
 
 		if(array_key_exists($name, $this->fields)) { // check to see if it's a field
 			return $this->data[$name];
-		} else if(in_array($name, $this->has_many) || in_array($name, $this->has_one) || in_array($name, $this->belongs_to)) {
+		} else if(
+			(is_array($this->relationships["has_many"]) && in_array($name, $this->relationships["has_many"])) || 
+			(is_array($this->relationships["has_one"]) && in_array($name, $this->relationships["has_one"])) || 
+			(is_array($this->relationships["belongs_to"]) && in_array($name, $this->relationships["belongs_to"]))
+		) {
 			$model = $this->extrapolate_model_class($name);
 			if(count($this->data) > 0) {
 				
@@ -76,15 +78,15 @@ class KraftwerkModel extends MySQLConnector {
 				$new_class = new $model(); // create new instance
 
 				// determine whether to send children or parent model
-				if(in_array($name, $this->has_many)) {
+				if(is_array($this->relationships["has_many"]) && in_array($name, $this->relationships["has_many"])) {
 					$table_singular_name = kw_singularize($this->extrapolate_table());
 					$conditions[$table_singular_name . "_id"] = $this->data["id"];
 					return $new_class->find_all($conditions);
-				} else if(in_array($name, $this->has_one)) {
+				} else if(is_array($this->relationships["has_one"]) && in_array($name, $this->relationships["has_one"])) {
 					$table_singular_name = kw_singularize($this->extrapolate_table());
 					$conditions[$table_singular_name . "_id"] = $this->data["id"];
 					return $new_class->find_by($conditions);
-				} else if(in_array($name, $this->belongs_to)) {
+				} else if(is_array($this->relationships["belongs_to"]) && in_array($name, $this->relationships["belongs_to"])) {
 					$parent_singular_name = kw_singularize($name);
 					$conditions["id"] = $this->data[$parent_singular_name . "_id"];
 					return $new_class->find_by($conditions);
@@ -421,6 +423,18 @@ class KraftwerkModel extends MySQLConnector {
 		return $this->fields;
 	}
 	
+	/*
+		HAS FIELD
+		Declares a field for the model at construct, initializes it
+		@param field = Field name to initialize, required
+		@param properties = Field Options, required
+	*/
+	public function has_field($field,$properties) {
+		if($field != "" && $field != NULL && is_array($properties)) {
+			$this->fields[$field] = $properties;
+		}
+	}
+	
 	
 	/*
 		###########################################################
@@ -433,12 +447,15 @@ class KraftwerkModel extends MySQLConnector {
 		@param $models = Array of models to push, if single string, pushes only that model
 	*/
 	public function has_many($models) {
+		if(!is_array($this->relationships["has_many"])) {
+			$this->relationships["has_many"] = array();	
+		}
 		if(is_array($models)) {
 			foreach($models as $i => $m ) {
-				array_push($this->has_many,$m);
+				array_push($this->relationships["has_many"],$m);
 			}
 		} else if(is_string($models)) {
-			array_push($this->has_many,$models); // push single model
+			array_push($this->relationships["has_many"],$models); // push single model
 		}
 	}
 	
@@ -447,8 +464,11 @@ class KraftwerkModel extends MySQLConnector {
 		@param $models = Array of models to push, if single string, pushes only that model
 	*/
 	public function has_one($model) {
+		if(!is_array($this->relationships["has_one"])) {
+			$this->relationships["has_one"] = array();	
+		}
 		if(is_string($model)) {
-			array_push($this->has_one,$model);
+			array_push($this->relationships["has_one"],$model);
 		}
 	}
 	
@@ -457,13 +477,16 @@ class KraftwerkModel extends MySQLConnector {
 		@param $models = Array of models to push, if single string, pushes only that model
 	*/
 	public function belongs_to($models) {
+		if(!is_array($this->relationships["belongs_to"])) {
+			$this->relationships["belongs_to"] = array();	
+		}
 		if(is_array($models)) {
 			foreach($models as $i => $m ) {
-				array_push($this->belongs_to,$m);
+				array_push($this->relationships["belongs_to"],$m);
 			}
 		} else if(is_string($models)) {
 			$m = $models; // push single model
-			array_push($this->belongs_to,$m);
+			array_push($this->relationships["belongs_to"],$m);
 		}
 	}
 	

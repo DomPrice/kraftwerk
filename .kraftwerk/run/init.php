@@ -33,8 +33,8 @@ if ($kw_config->display_errors == true) {
 	ini_set('error_reporting', E_ERROR | E_WARNING | E_PARSE);
 }
 
-include_once(dirname(__FILE__) . '/core/Kraftwerk.php');
-$GLOBALS['kraftwerk'] = new Kraftwerk(); // run kraftwerk
+include_once(dirname(__FILE__) . '/kernal/Kraftwerk.php');
+$GLOBALS['kraftwerk'] = new Kraftwerk(); // run kraftwerk kernal
 
 // generate log file
 $GLOBALS['kraftwerk']->logger->generate($GLOBALS['kraftwerk']->get_log_dir() . "/kraftwerk.log");
