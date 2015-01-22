@@ -19,6 +19,12 @@ class MySQLConnector {
 	protected $status 		= 0;
 	protected $statusCodes 	= array();
 	
+	// STORED DB USERNAME AND PASS
+	private $db_server   = NULL;
+	private $db_username = NULL;
+	private $db_password = NULL;
+	private $db_schema   = NULL;
+	
 	// STORE
 	var $LAST_QUERY = ""; // stores last query so it can be referenced later.
 
@@ -29,7 +35,7 @@ class MySQLConnector {
 		@param $pass = database password for login
 		@param $schema = (optional) default scheme for database.
 	*/
-	public function __construct() { // schema is optional
+	public function __construct($db_server="", $db_username="", $db_password="", $db_schema="") { // schema is optional
 
 		// SET ERROR CODES
 		$this->statusCodes[0] = "No Errors, Database Connector is Idle";
@@ -38,6 +44,12 @@ class MySQLConnector {
 		$this->statusCodes[3] = "Query Result Failed to Parse";
 		$this->statusCodes[4] = "Query Failed";
 		$this->statusCodes[5] = "Query Successfully Run and Parsed";
+		
+		// SAVE CREDENTIALS
+		$db_server 		!= "" ? $this->db_server 	= $db_server 	: $this->db_server = "" ;
+		$db_username 	!= "" ? $this->db_username 	= $db_username 	: $this->db_username = "" ;
+		$db_password 	!= "" ? $this->db_password 	= $db_password 	: $this->db_password = "" ;
+		$db_schema 		!= "" ? $this->db_schema	= $db_schema 	: $this->db_schema = "" ;
 
 	}
 
@@ -55,12 +67,13 @@ class MySQLConnector {
 		$this->status = 0;
 
 		// create connection
-		$innerConn = new mysqli($kw_config->site_database_server, $kw_config->site_database_username, $kw_config->site_database_password);
+		$credentials = $this->getCredentials();
+		$innerConn = new mysqli($credentials->db_server, $credentials->db_username, $credentials->db_password);
 		
 		// check connection
 		if(!mysqli_connect_errno()) {
 
-			$innerConn->select_db($kw_config->site_database_schema); // select database
+			$innerConn->select_db($credentials->db_schema); // select database
 			$queryResult = $innerConn->query($query);
 
 			if($queryResult) { // run query
@@ -145,6 +158,23 @@ class MySQLConnector {
 
 		// RETURN PARSED QUERY RESULT
 		return $parsedOut;
+	}
+	
+	/* 
+		UTILITY FUNCTION, RETURNS EITHER KRAFTWERK'S DB CREDENTIALS SETTINGS OR THE ONES USED AT CONSTRUCT
+		This allows the MySQLConnector to be used standalone.
+	*/
+	private function getCredentials() {
+		global $kw_config;
+		$creds = new StdClass();
+		
+		// use native credentials, or attempt to use site login.
+		$this->db_server 	!= "" ? $creds->db_server 	= $this->db_server 		: $creds->db_server = $kw_config->site_database_server;
+		$this->db_username 	!= "" ? $creds->db_username = $this->db_username 	: $creds->db_username = $kw_config->site_database_username;
+		$this->db_password 	!= "" ? $creds->db_password = $this->db_password 	: $creds->db_password = $kw_config->site_database_password;
+		$this->db_schema 	!= "" ? $creds->db_schema	= $this->db_schema 		: $creds->db_schema = $kw_config->site_database_schema;
+
+		return $creds;
 	}
 
 	/* 
