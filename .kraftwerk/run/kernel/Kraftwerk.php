@@ -52,7 +52,7 @@ class Kraftwerk {
 		CONSTRUTOR
 	*/
 	public function __construct() {
-		$this->setRootPath();
+		$this->setRootPathes();
 		$this->pathNames();
 		$this->loadComponents();
 		$this->loadLogger();
@@ -66,27 +66,27 @@ class Kraftwerk {
 	private function loadConfig() {
 		global $kw_env;
 		global $kw_config;
-		$use_env = $kw_env->USE_ENV;
-		$kw_config->parse_config_file($this->CONFIG_GLOBAL_DIR . "/" . $use_env . ".yml");	
+		$kw_env->parse_env_file($this->CONFIG_GLOBAL_DIR . "/environment.yml");	
+		$kw_config->parse_config_file($this->CONFIG_GLOBAL_DIR . "/" . $kw_env->USE_ENV . ".yml");	
 	}
 	
 	/*
 		CONFIGURE PATH NAMES
 	*/
 	private function pathNames() {
-		$this->CONFIG_GLOBAL_DIR	= $this->ROOT_PATH . $this->CONFIG_GLOBAL_DIR;
-		$this->CONTROLLERS_DIR		= $this->ROOT_PATH . $this->CONTROLLERS_DIR;
-		$this->MODELS_DIR			= $this->ROOT_PATH . $this->MODELS_DIR;
-		$this->VIEWS_DIR			= $this->ROOT_PATH . $this->VIEWS_DIR;
-		$this->APP_LIBS_DIR			= $this->ROOT_PATH . $this->APP_LIBS_DIR;
-		$this->COGS_DIR				= $this->ROOT_PATH . $this->COGS_DIR;
-		$this->LOGS_DIR				= $this->ROOT_PATH . $this->LOGS_DIR;
-		$this->RUN_DIR				= $this->ROOT_PATH . $this->RUN_DIR;
-		$this->ASSETS_DIR			= $this->ROOT_PATH . $this->ASSETS_DIR;
+		$this->CONFIG_GLOBAL_DIR	= $this->KW_ROOT_PATH . $this->CONFIG_GLOBAL_DIR;
+		$this->CONTROLLERS_DIR		= $this->KW_ROOT_PATH . $this->CONTROLLERS_DIR;
+		$this->MODELS_DIR			= $this->KW_ROOT_PATH . $this->MODELS_DIR;
+		$this->VIEWS_DIR			= $this->KW_ROOT_PATH . $this->VIEWS_DIR;
+		$this->APP_LIBS_DIR			= $this->KW_ROOT_PATH . $this->APP_LIBS_DIR;
+		$this->COGS_DIR				= $this->KW_ROOT_PATH . $this->COGS_DIR;
+		$this->LOGS_DIR				= $this->KW_ROOT_PATH . $this->LOGS_DIR;
+		$this->RUN_DIR				= $this->KW_ROOT_PATH . $this->RUN_DIR;
+		$this->ASSETS_DIR			= $this->KW_ROOT_PATH . $this->ASSETS_DIR;
 		
 		// DEPENDENCIES
-		$this->LIBS_DIR				= $this->ROOT_PATH . $this->LIBS_DIR;
-		$this->DEPENDENCIES_DIR		= $this->ROOT_PATH . $this->DEPENDENCIES_DIR;
+		$this->LIBS_DIR				= $this->KW_ROOT_PATH . $this->LIBS_DIR;
+		$this->DEPENDENCIES_DIR		= $this->KW_ROOT_PATH . $this->DEPENDENCIES_DIR;
 	}
 
 	/* 
@@ -247,9 +247,12 @@ class Kraftwerk {
 	/*
 		Get root path for dependencies
 	*/
-	private function setRootPath() {
+	private function setRootPathes() {
 		$realpath = dirname(__FILE__);
-		$this->ROOT_PATH = substr($realpath,0,strpos($realpath,"/run/kernel")); // trim off runtime directory	
+		$kernal_path_pos = strpos($realpath,"/run/kernel");
+		$this->KW_ROOT_PATH = substr($realpath,0,$kernal_path_pos); // trim off runtime directory
+		$webroot_path_pos = strrpos($this->KW_ROOT_PATH,"/");
+		$this->WEB_ROOT_PATH = substr($realpath,0,$webroot_path_pos); // trim off kraftwerk directory	
 	}
 	
 }

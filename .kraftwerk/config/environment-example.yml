@@ -1,0 +1,6 @@
+---
+
+# SWITCH CURRENT KRAFTWERK ENVIRONMENT
+use_env: kwconfig
+#use_env: production
+#use_env: development

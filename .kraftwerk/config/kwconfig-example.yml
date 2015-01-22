@@ -10,7 +10,7 @@ default_language: en-us
 
 #IMAGE SETTINGS
 image_save_dir:              /files
-image_display_path:	         /images
+image_display_path:          /images
 image_max_size:              2097152    # 2 Megabytes
 image_accept_files:          image/jpeg, image/jpg
 image_default_jpeg_quality:  99    # 1-100
