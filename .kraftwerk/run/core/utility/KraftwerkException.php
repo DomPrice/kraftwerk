@@ -26,8 +26,8 @@ class KraftwerkException extends Exception {
 			header("Location: /" . $kw_config->error_page);
 			exit;
 		} else { // use kraftwerk's default error handling page
-			$error_template = realpath($_SERVER['DOCUMENT_ROOT']) . $kw_config->hosted_dir . $kraftwerk->ASSETS_DIR . "/error_template.php";
-			$error_template_logo = $kraftwerk->ASSETS_DIR . "/kwlogo.png";
+			$error_template = $kraftwerk->ASSETS_DIR . "/error_template.php";
+			$error_template_logo = "/kwlogo.png";
 			$error_stacktrace = $e;
 			if(file_exists($error_template)) {
 				try {

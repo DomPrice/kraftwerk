@@ -213,4 +213,20 @@ function kw_singularize($params) {
     return $word;
 }
 
+/*
+	UTILITY FUNCTION: PARSE YAML
+	This uses the third party SPYC dependency
+	@param $str = string, can be filename or string: NOTE: Kraftwerk will always assume file is from website root unless specified.
+*/
+function kw_parse_yaml($str) {
+	if(is_file($str)) {
+		$filename = $str;
+		if(file_exists($filename)) {
+			return Spyc::YAMLLoad($filename);
+		}
+	} else {
+		return Spyc::YAMLLoadString($str);
+	}
+}
+
 ?>

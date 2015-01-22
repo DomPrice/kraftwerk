@@ -92,15 +92,15 @@ class KraftwerkController {
 		
 		// RENDER
 		if($view != NULL && $view != "") {
-			$path =  $kw_config->hosted_dir . $kraftwerk->VIEWS_DIR . "/" . $this->extrapolate_view($view);
+			$path =  $kraftwerk->VIEWS_DIR . "/" . $this->extrapolate_view($view);
 		} else {
-			$path =  $kw_config->hosted_dir . $kraftwerk->VIEWS_DIR . "/" . $this->extrapolate_view();
+			$path =  $kraftwerk->VIEWS_DIR . "/" . $this->extrapolate_view();
 		}
 		
 		// OUTPUT TO BUFFER FOR LATER INSERTION INTO TEMPLATE
 		ob_start();
-		if(file_exists(realpath($_SERVER['DOCUMENT_ROOT']) . $path)) {
-			if(!include_once(realpath($_SERVER['DOCUMENT_ROOT']) . $path)) {
+		if(file_exists($path)) {
+			if(!include_once($path)) {
 				$error = "Kraftwerk cannot open view file [" . $this->extrapolate_view($view) . "]";	
 				$kraftwerk->logger->log_error($error);
 				$kraftwerk->exception->throw_error($error);	
@@ -139,7 +139,7 @@ class KraftwerkController {
 				}
 			}
 
-			$snippet_path = realpath($_SERVER['DOCUMENT_ROOT']) . $kw_config->hosted_dir . $kraftwerk->VIEWS_DIR . "/_layouts/_snippets/" . $snippet . ".php";
+			$snippet_path = $kraftwerk->VIEWS_DIR . "/_layouts/_snippets/" . $snippet . ".php";
 			if(file_exists($snippet_path)) {
 				include_once($snippet_path);
 			} else {
@@ -161,7 +161,7 @@ class KraftwerkController {
 		}
 
 		// RENDER TEMPLATE
-		$template_path = realpath($_SERVER['DOCUMENT_ROOT']) . $kw_config->hosted_dir . $kraftwerk->VIEWS_DIR . "/_layouts/_templates/" . $this->template . ".php";
+		$template_path = $kraftwerk->VIEWS_DIR . "/_layouts/_templates/" . $this->template . ".php";
 		if(file_exists($template_path)) {
 			include_once($template_path);
 		} else {

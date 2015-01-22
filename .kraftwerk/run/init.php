@@ -24,8 +24,10 @@
 include_once(dirname(__FILE__) . '/dep/constants.php');
 
 // LOAD KRAFTWERK APPLICATION
-include_once(dirname(__FILE__) . '/../config/kwconfig.php');
-$kw_config = new KWConfig();
+include_once(dirname(__FILE__) . '/kernel/KraftwerkEnv.php');
+include_once(dirname(__FILE__) . '/kernel/KraftwerkConfig.php');
+$kw_env = new KraftwerkEnv();
+$kw_config = new KraftwerkConfig();
 
 // ERRORS
 if ($kw_config->display_errors == true) {
@@ -33,7 +35,7 @@ if ($kw_config->display_errors == true) {
 	ini_set('error_reporting', E_ERROR | E_WARNING | E_PARSE);
 }
 
-include_once(dirname(__FILE__) . '/kernal/Kraftwerk.php');
+include_once(dirname(__FILE__) . '/kernel/Kraftwerk.php');
 $GLOBALS['kraftwerk'] = new Kraftwerk(); // run kraftwerk kernal
 
 // generate log file

@@ -46,7 +46,7 @@ class KraftwerkMailer extends SendMailConnector {
 		}
 		
 		// RENDER MAILER TEMPLATE
-		$template_path = realpath($_SERVER['DOCUMENT_ROOT']) . $kw_config->hosted_dir . $kraftwerk->VIEWS_DIR . "/_layouts/_mailers/" . $this->template . ".php";
+		$template_path = $kraftwerk->VIEWS_DIR . "/_layouts/_mailers/" . $this->template . ".php";
 		if(file_exists($template_path)) {
 			ob_start();
 			include_once($template_path);

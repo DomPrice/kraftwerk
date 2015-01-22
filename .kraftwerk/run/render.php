@@ -24,4 +24,6 @@ $GLOBALS['kraftwerk']->loadController($_GET["controller"]);
 $GLOBALS['kraftwerk']->loadAction($_GET["action"]);
 
 
+
+
 ?>
