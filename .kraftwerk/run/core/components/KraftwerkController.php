@@ -75,6 +75,7 @@ class KraftwerkController {
 	public function render($view="",$options=array()) {
 		global $kraftwerk;
 		global $kw_config;
+		global $KW_ENV;
 		
 		// SAVE RENDER VARS
 		global $kw_render_vars;
@@ -131,6 +132,7 @@ class KraftwerkController {
 			global $kraftwerk;
 			global $kw_config;
 			global $kw_render_vars;
+			global $KW_ENV;
 			
 			// REGISTER GLOBALS, THESE SHOULD ALREADY BE SAVED AT RENDER
 			if($kw_render_vars != NULL && $kw_render_vars != "" && count($kw_render_vars) > 0) {

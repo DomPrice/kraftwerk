@@ -95,7 +95,6 @@ class Kraftwerk {
 		VOID
 	*/
 	private function loadComponents() {
-		global $kw_config;	
 
 		// load cogs (extensions) and dependencies
 		$this->loadComponentDirectory($this->LIBS_DIR);
@@ -147,7 +146,6 @@ class Kraftwerk {
 	
 	/* INITLIALIZE LOGGER */
 	private function loadLogger() {
-		global $kw_config;
 		$this->logger = new KraftwerkLogger();
 	}
 	

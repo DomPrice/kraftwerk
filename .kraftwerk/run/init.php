@@ -26,8 +26,8 @@ include_once(dirname(__FILE__) . '/dep/constants.php');
 // LOAD KRAFTWERK APPLICATION
 include_once(dirname(__FILE__) . '/kernel/KraftwerkEnv.php');
 include_once(dirname(__FILE__) . '/kernel/KraftwerkConfig.php');
-$kw_env = new KraftwerkEnv();
-$kw_config = new KraftwerkConfig();
+$GLOBALS['kw_env'] = new KraftwerkEnv();
+$GLOBALS['kw_config'] = new KraftwerkConfig();
 
 // ERRORS
 if ($kw_config->display_errors == true) {
@@ -37,6 +37,10 @@ if ($kw_config->display_errors == true) {
 
 include_once(dirname(__FILE__) . '/kernel/Kraftwerk.php');
 $GLOBALS['kraftwerk'] = new Kraftwerk(); // run kraftwerk kernal
+
+// convert env to struct, since we don't need it for special purposes anymore
+$GLOBALS['KW_ENV'] = $kw_env->to_struct();
+unset($kw_env); // destroy env object;
 
 // generate log file
 $GLOBALS['kraftwerk']->logger->generate($GLOBALS['kraftwerk']->get_log_dir() . "/kraftwerk.log");
