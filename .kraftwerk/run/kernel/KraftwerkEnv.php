@@ -23,7 +23,7 @@ class KraftwerkEnv {
 	}
 	
 	// parse environment file
-	public function parse_env_file($config_file) {
+	public function parse_settings_file($config_file) {
 		$this->VARS = kw_parse_yaml($config_file);
 	}
 	

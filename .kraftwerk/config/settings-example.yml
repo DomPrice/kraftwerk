@@ -1,9 +1,8 @@
 ---
 
 # SWITCH CURRENT KRAFTWERK ENVIRONMENT
-use_env: kwconfig
 #use_env: production
-#use_env: development
+use_env: development
 
 # EXAMPLE OF SETTING KRAFTWERK ENVIRONMENT VARS
 whitelist: [127.0.0.1, 23.234.45.54]

@@ -46,7 +46,8 @@ class Kraftwerk {
 	public $logger = "";
 	
 	// ROOT PATH
-	var $ROOT_PATH;
+	var $KW_ROOT_PATH;
+	var $WEB_ROOT_PATH;
 	
 	/* 
 		CONSTRUTOR
@@ -66,8 +67,8 @@ class Kraftwerk {
 	private function loadConfig() {
 		global $kw_env;
 		global $kw_config;
-		$kw_env->parse_env_file($this->CONFIG_GLOBAL_DIR . "/environment.yml");	
-		$kw_config->parse_config_file($this->CONFIG_GLOBAL_DIR . "/" . $kw_env->USE_ENV . ".yml");	
+		$kw_env->parse_settings_file($this->CONFIG_GLOBAL_DIR . "/settings.yml");	
+		$kw_config->parse_config_file($this->CONFIG_GLOBAL_DIR . "/environments/" . $kw_env->use_env . ".yml");	
 	}
 	
 	/*
