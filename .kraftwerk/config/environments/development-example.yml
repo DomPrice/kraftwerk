@@ -4,7 +4,7 @@ site_database_server:    127.0.0.1
 site_database_username:  root
 site_database_password:  my_password
 site_database_schema:    my_database
-	
+  
 # CORE CONFIG
 default_language: en-us
 
@@ -16,8 +16,8 @@ image_accept_files:          image/jpeg, image/jpg
 image_default_jpeg_quality:  99    # 1-100
 image_max_width:             500   # in pixels
 image_max_height:            500   # in pixels
-	
+  
 # ERROR HANDLING
-display_errors:	true;
+display_errors:  true;
 
 
