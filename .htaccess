@@ -1,34 +1,34 @@
-# OPTIONS
-Options +FollowSymLinks -Indexes
-
-# REWRITE PATHES
-<IfModule mod_rewrite.c>
-RewriteEngine on
-RewriteBase /
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteCond %{REQUEST_FILENAME} !-l
-RewriteRule ^([A-Za-z0-9_-]+)$ /.kraftwerk/run/render.php?controller=$1&action=index
-RewriteRule ^([A-Za-z0-9_-]+)/?$ /.kraftwerk/run/render.php?controller=$1&action=index [L,QSA]
-
-RewriteRule ^([A-Za-z0-9_-]+)/([A-Za-z0-9_-]+)$ /.kraftwerk/run/render.php?controller=$1&action=$2
-RewriteRule ^([A-Za-z0-9_-]+)/([A-Za-z0-9_-]+)/?$ /.kraftwerk/run/render.php?controller=$1&action=$2 [L,QSA]
-
-RewriteRule ^([A-Za-z0-9_-]+)/([A-Za-z0-9_-]+)/([A-Za-z0-9_-]+)$ /.kraftwerk/run/render.php?controller=$1&action=$2&id=$3
-RewriteRule ^([A-Za-z0-9_-]+)/([A-Za-z0-9_-]+)/([A-Za-z0-9_-]+)/?$ /.kraftwerk/run/render.php?controller=$1&action=$2&id=$3 [L,QSA]
-
-# FORCE ROOT TO index/index
-RewriteRule ^$ /.kraftwerk/run/render.php?controller=index&action=index
-
-# DENY ACCESS TO KRAFTWERK EXCEPT RENDER FILE (.kraftwerk/run/render.php)
-RedirectMatch 403 ^/.kraftwerk/(.*)/$
-RedirectMatch 403 ^/.kraftwerk/run/(.*)/$
-RedirectMatch 403 ^/.kraftwerk/run/(.*)/(.*)$
-RedirectMatch 403 ^/.kraftwerk/run/init.php$
-RedirectMatch 403 ^/.kraftwerk/assets/(.*).php$
-RedirectMatch 403 ^/.kraftwerk/(?:application|config|logs|cogs)/(.*)$
-
-# HIDE KRAFTWERK LOGO
-RewriteRule ^kwlogo.png$ /.kraftwerk/assets/kwlogo.png
-
-</IfModule>
+# OPTIONS
+Options +FollowSymLinks -Indexes
+
+# REWRITE PATHES
+<IfModule mod_rewrite.c>
+RewriteEngine on
+RewriteBase /
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME} !-l
+RewriteRule ^([A-Za-z0-9_-]+)$ /.kraftwerk/run/render.php?controller=$1&action=index
+RewriteRule ^([A-Za-z0-9_-]+)/?$ /.kraftwerk/run/render.php?controller=$1&action=index [L,QSA]
+
+RewriteRule ^([A-Za-z0-9_-]+)/([A-Za-z0-9_-]+)$ /.kraftwerk/run/render.php?controller=$1&action=$2
+RewriteRule ^([A-Za-z0-9_-]+)/([A-Za-z0-9_-]+)/?$ /.kraftwerk/run/render.php?controller=$1&action=$2 [L,QSA]
+
+RewriteRule ^([A-Za-z0-9_-]+)/([A-Za-z0-9_-]+)/([A-Za-z0-9_-]+)$ /.kraftwerk/run/render.php?controller=$1&action=$2&id=$3
+RewriteRule ^([A-Za-z0-9_-]+)/([A-Za-z0-9_-]+)/([A-Za-z0-9_-]+)/?$ /.kraftwerk/run/render.php?controller=$1&action=$2&id=$3 [L,QSA]
+
+# FORCE ROOT TO index/index
+RewriteRule ^$ /.kraftwerk/run/render.php?controller=index&action=index
+
+# DENY ACCESS TO KRAFTWERK EXCEPT RENDER FILE (.kraftwerk/run/render.php)
+RedirectMatch 403 ^/.kraftwerk/(.*)/$
+RedirectMatch 403 ^/.kraftwerk/run/(.*)/$
+RedirectMatch 403 ^/.kraftwerk/run/(.*)/(.*)$
+RedirectMatch 403 ^/.kraftwerk/run/init.php$
+RedirectMatch 403 ^/.kraftwerk/assets/(.*).php$
+RedirectMatch 403 ^/.kraftwerk/(?:application|config|logs|cogs)/(.*)$
+
+# HIDE KRAFTWERK LOGO
+RewriteRule ^kwlogo.png$ /.kraftwerk/assets/kwlogo.png
+
+</IfModule>
