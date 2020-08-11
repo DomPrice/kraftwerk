@@ -3,7 +3,7 @@
 	KRAFTWERK GLOBAL CONSTANTS
 */
 
-define('KRAFTWERK_VERSION','');
+define('KRAFTWERK_VERSION','2.1.0.1');
 
 define('FORMAT_EMAIL','/^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$/');
 define('FORMAT_US_PHONE','/^\(?(\d{3})\)?[-\. ]?(\d{3})[-\. ]?(\d{4})$/');

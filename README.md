@@ -1,5 +1,6 @@
-kraftwerk
+Kraftwerk
 =========
+version: 2.1.0.1
 
 Kraftwerk is an MVC PHP, rails inspired framework. It allows a robust rails-like PHP MVC framework to 
 be used on a LAMP server without being forced to learn or install ruby. It can be run on any host 

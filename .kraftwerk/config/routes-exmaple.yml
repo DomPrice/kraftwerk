@@ -1,0 +1,5 @@
+# CUSTOM ROUTES
+# ----------------------------------------------------------------------------------
+# Custom routes and their mappings go here
+---
+some-example/action: some_example/another_action

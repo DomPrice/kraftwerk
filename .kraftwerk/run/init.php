@@ -31,8 +31,10 @@ include_once(dirname(__FILE__) . '/dep/constants.php');
 // LOAD KRAFTWERK APPLICATION
 include_once(dirname(__FILE__) . '/kernel/KraftwerkEnv.php');
 include_once(dirname(__FILE__) . '/kernel/KraftwerkConfig.php');
+include_once(dirname(__FILE__) . '/kernel/KraftwerkRoutes.php');
 $GLOBALS['kw_env'] = new KraftwerkEnv();
 $GLOBALS['kw_config'] = new KraftwerkConfig();
+$GLOBALS['kw_routes'] = new KraftwerkRoutes();
 
 // ERRORS
 if ($kw_config->display_errors == true) {

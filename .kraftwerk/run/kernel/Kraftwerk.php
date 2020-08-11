@@ -14,7 +14,8 @@ class Kraftwerk {
 	var $CONSTANTS = array();
 
 	// COMPOMENT DIRECTORIES
-	// These will be appended to by the core if the hosting directory is different than "/" as set in config/config.php
+	// These will be appended to by the core if the hosting directory is
+	// different than "/" as set in config/config.php
 
 	var $CONFIG_GLOBAL_DIR = "/config";
 	var $CONTROLLERS_DIR   = "/application/controllers";
@@ -38,8 +39,9 @@ class Kraftwerk {
 	var $CURRENT_CONTROLLER       = NULL;
 	var $CURRENT_ACTION           = NULL;
 
-	// CONFIG VAR
+	// CONFIG AND ROUTES VARS
 	var $CONFIG = "";
+	var $ROUTES = "";
 
 	// PUBLIC VARIABLES AND OBJECTS
 	public $logger = "";
@@ -66,8 +68,11 @@ class Kraftwerk {
 	private function loadConfig() {
 		global $kw_env;
 		global $kw_config;
+		global $kw_routes;
 		$kw_env->parse_settings_file($this->CONFIG_GLOBAL_DIR . "/settings.yml");
 		$kw_config->parse_config_file($this->CONFIG_GLOBAL_DIR . "/environments/" . $kw_env->use_env . ".yml");
+    $kw_routes->parse_config_file($this->CONFIG_GLOBAL_DIR . "/routes.yml");
+		$kw_routes->map_routes();
 	}
 
 	/*
@@ -160,6 +165,12 @@ class Kraftwerk {
 		@return true/false
 	*/
 	public function loadController($controller) {
+		global $kw_routes;
+
+		// Check routes for controller override
+		if($controller != "application") { // Skip application controller
+			$controller = $kw_routes->override_controller_mapping($controller);
+		}
 
 		// Include controller class file and then initialize it
 		if(file_exists($this->CONTROLLERS_DIR . "/" . $controller . "_controller.php")) {
@@ -200,6 +211,12 @@ class Kraftwerk {
 		@return true/false
 	*/
 	public function loadAction($action) {
+		global $kw_routes;
+
+		// Check routes for action override
+		$action = $kw_routes->override_action_mapping($action);
+
+		// Load the action
 		try {
 			$this->CURRENT_ACTION = $action;
 			$function = '$this->CURRENT_CONTROLLER->' . $this->CURRENT_ACTION;
